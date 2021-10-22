@@ -19,6 +19,9 @@
     <None Update="DataObjects\Config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="DataObjects\ReminderList.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="DataObjects\WordList.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
