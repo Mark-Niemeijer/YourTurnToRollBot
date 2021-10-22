@@ -22,6 +22,8 @@ namespace No_u_discord_bot.LooseSystems
 			while (true)
 			{
 				ReminderListJson reminderFile = JsonParser.GetInstance().LoadData<ReminderListJson>(JsonParser.FileEnum.ReminderFile);
+				if (reminderFile == null) return;
+
 				for (int i = 0; i < reminderFile.UserID.Count; i++)
 				{
 					ulong userId = reminderFile.UserID[i];
