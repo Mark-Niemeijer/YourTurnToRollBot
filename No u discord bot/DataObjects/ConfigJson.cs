@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace No_u_discord_bot
+namespace No_u_discord_bot.DataObjects
 {
 	public class ConfigJson
 	{

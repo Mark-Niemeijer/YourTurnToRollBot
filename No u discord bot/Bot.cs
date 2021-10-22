@@ -49,7 +49,8 @@ namespace No_u_discord_bot
 			Commands.RegisterCommands<DiceRollCommands>();
 			Commands.RegisterCommands<PetCommand>();
 			Commands.RegisterCommands<BirthdayCelebratorCommands>();
-			
+			Commands.RegisterCommands<ReminderCommands>();
+
 
 			Client.UseInteractivity(new InteractivityConfiguration()
 			{
@@ -65,6 +66,7 @@ namespace No_u_discord_bot
 		private Task OnClientReady(DiscordClient sender, DSharpPlus.EventArgs.ReadyEventArgs e)
 		{
 			BirthDayTimer.StartDateChecker(sender);
+			ReminderTimer.StartDateChecker(sender);
 			Console.WriteLine("Bot ready to go");
 			return Task.CompletedTask;
 		}
