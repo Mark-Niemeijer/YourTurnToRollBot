@@ -12,14 +12,7 @@ namespace No_u_discord_bot.Commands
 	{
 		[Command("Reminder"), Description("Syntax: $[Command] [Number of units to wait] [The unit type] [What the bot should say then]\nThe bot will remind you of whatever you said")]
 		public async Task RemindPerson(CommandContext commandContext, int reminderNumber, string reminderUnit, [RemainingText] string Message)
-		{
-			ReminderListJson currentRemindersList = JsonParser.GetInstance().LoadData<ReminderListJson>(JsonParser.FileEnum.ReminderFile);
-			if (currentRemindersList == null) currentRemindersList = new ReminderListJson();
-			if (currentRemindersList.RemindInChannel == null) currentRemindersList.RemindInChannel = new List<ulong>();
-			if (currentRemindersList.DateReminder == null) currentRemindersList.DateReminder = new List<DateTime>();
-			if (currentRemindersList.ReminderMessage == null) currentRemindersList.ReminderMessage = new List<string>();
-			if (currentRemindersList.UserID == null) currentRemindersList.UserID = new List<ulong>();
-			
+		{			
 			if (reminderNumber < 1)
 			{
 				await commandContext.Channel.SendMessageAsync("I am not gonna remind you of something that has already happend :unamused:").ConfigureAwait(false);
@@ -45,6 +38,7 @@ namespace No_u_discord_bot.Commands
 					return;
 			}
 
+			ReminderListJson currentRemindersList = JsonParser.GetInstance().LoadData<ReminderListJson>(JsonParser.FileEnum.ReminderFile);
 			currentRemindersList.UserID.Add(commandContext.User.Id);
 			currentRemindersList.DateReminder.Add(timeToBeReminded);
 			currentRemindersList.ReminderMessage.Add(Message);

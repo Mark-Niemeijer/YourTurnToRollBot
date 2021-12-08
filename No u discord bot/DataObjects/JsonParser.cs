@@ -39,6 +39,7 @@ namespace No_u_discord_bot.DataObjects
 				}
 			}
 			T jsonOutput = JsonConvert.DeserializeObject<T>(json);
+			if (jsonOutput == null) jsonOutput = (T)Activator.CreateInstance(typeof(T));
 			jsonOutput.ValidateData();
 
 			return jsonOutput;
