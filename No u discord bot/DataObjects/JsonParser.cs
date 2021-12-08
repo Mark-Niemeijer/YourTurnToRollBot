@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using No_u_discord_bot.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,19 +54,24 @@ namespace No_u_discord_bot.DataObjects
 					json = streamReader.ReadToEnd();
 				}
 			}
+
 			T jsonOutput = JsonConvert.DeserializeObject<T>(json);
-			if (jsonOutput == null) jsonOutput = (T)Activator.CreateInstance(typeof(T));
+			if (jsonOutput == null)
+			{
+				CustomDebugInfo.LogError("During loading the wrong filepath was provided or the file was empty");
+				jsonOutput = (T)Activator.CreateInstance(typeof(T));
+			}
 			jsonOutput.ValidateData();
 
 			return jsonOutput;
 		}
 
-		public void SaveData(object dataClass)
+		public void SaveData(IDataFile dataClass)
 		{
 			ParserInfo parserInfo = parserInfos.FirstOrDefault(i => i.FileType == dataClass.GetType());
 			if (parserInfo == null)
 			{
-				//Do some warning
+				CustomDebugInfo.LogError("During saving the FileType could not be matched to a location");
 			}
 			else
 			{

@@ -25,6 +25,7 @@ namespace No_u_discord_bot.NonCommandCommands
 				if (brokenUpResponse.Length == 1)
 				{
 					await e.Message.RespondAsync("Hello " + brokenUpResponse[0] + ". I am " + botClient.CurrentUser.Mention);
+					CustomDebugInfo.LogInfo("Made dad joke to " + e.Author.Username);
 				}
 			}
 		}

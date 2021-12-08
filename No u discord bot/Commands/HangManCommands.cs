@@ -34,6 +34,15 @@ namespace No_u_discord_bot.Commands
 			await commandContext.Channel.SendMessageAsync("I am ready to host a game of hangman. Everyone who wants to join should type '$join' or '/join'\n" +
 														  "When you are ready to start, type '$begin' or '/begin'").ConfigureAwait(false);
 			await PlayerJoin(commandContext);
+
+			if (commandContext.Channel.IsPrivate)
+			{
+				CustomDebugInfo.LogInfo("Hangman lobby started in DM channel from " + commandContext.User.Username);
+			}
+			else
+			{
+				CustomDebugInfo.LogInfo("Hangman lobby started in '" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "'");
+			}
 		}
 
 		[Command("Join"), Description("Syntax: $[Command]\nJoin a game running in this channel"), CommandCustomGroupAttribute("Hangman")]
@@ -67,6 +76,15 @@ namespace No_u_discord_bot.Commands
 				hangManManager.BeginGame();
 				await commandContext.Channel.SendMessageAsync("Amount of letters: " + hangManManager.PlayerGuessedResult.Count).ConfigureAwait(false);
 				await PrintCurrentOutcome(commandContext, hangManManager);
+
+				if (commandContext.Channel.IsPrivate)
+				{
+					CustomDebugInfo.LogInfo("Hangman game started in DM channel from " + commandContext.User.Username);
+				}
+				else
+				{
+					CustomDebugInfo.LogInfo("Hangman game started in '" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "'");
+				}
 			}
 			else
 			{
@@ -102,6 +120,15 @@ namespace No_u_discord_bot.Commands
 				{
 					await commandContext.Channel.SendMessageAsync("YOU DID IT, You won the game :partying_face:").ConfigureAwait(false);
 					gameManagers.Remove(commandContext.Channel);
+
+					if (commandContext.Channel.IsPrivate)
+					{
+						CustomDebugInfo.LogInfo("Hangman game won by player in DM channel from " + commandContext.User.Username);
+					}
+					else
+					{
+						CustomDebugInfo.LogInfo("Hangman game won by player(s) in '" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "'");
+					}
 				}
 				else
 				{
@@ -113,6 +140,15 @@ namespace No_u_discord_bot.Commands
 			{
 				await commandContext.Channel.SendMessageAsync("Looks like I won this time :p\nThe word was: " + hangManManager.SelectedWord).ConfigureAwait(false);
 				gameManagers.Remove(commandContext.Channel);
+
+				if (commandContext.Channel.IsPrivate)
+				{
+					CustomDebugInfo.LogInfo("Hangman game lost by player in DM channel from " + commandContext.User.Username);
+				}
+				else
+				{
+					CustomDebugInfo.LogInfo("Hangman game lost by player(s) in '" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "'");
+				}
 			}
 			else if (hangManManager.CurrentStatus == HangManManager.GameStatus.InGame)
 			{
@@ -141,6 +177,15 @@ namespace No_u_discord_bot.Commands
 			hangManManager.EndGame(false);
 			gameManagers.Remove(commandContext.Channel); 
 			await commandContext.Channel.SendMessageAsync("Time to stop early? Alright then :p").ConfigureAwait(false);
+
+			if (commandContext.Channel.IsPrivate)
+			{
+				CustomDebugInfo.LogInfo("Hangman game stopped in DM channel from " + commandContext.User.Username);
+			}
+			else
+			{
+				CustomDebugInfo.LogInfo("Hangman game stopped in '" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "'");
+			}
 		}
 
 		private async Task PrintCurrentOutcome(CommandContext commandContext, HangManManager hangManManager)

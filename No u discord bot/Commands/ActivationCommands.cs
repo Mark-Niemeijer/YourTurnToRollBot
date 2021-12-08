@@ -23,6 +23,15 @@ namespace No_u_discord_bot.Commands
 				configJson.SilencedServerArray = silentServerIdList.ToArray();
 				JsonParser.GetInstance().SaveData(configJson);
 				await commandContext.Channel.SendMessageAsync("Alright :(").ConfigureAwait(false);
+
+				if (commandContext.Channel.IsPrivate)
+				{
+					CustomDebugInfo.LogInfo("Bot silenced in DM channel from " + commandContext.User.Username);
+				}
+				else
+				{
+					CustomDebugInfo.LogInfo("Bot silenced in '" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "'");
+				}
 			}
 		}
 
@@ -38,6 +47,15 @@ namespace No_u_discord_bot.Commands
 				configJson.SilencedServerArray = silentServerIdList.ToArray();
 				JsonParser.GetInstance().SaveData(configJson);
 				await commandContext.Channel.SendMessageAsync("Yaaaaaay :)").ConfigureAwait(false);
+
+				if (commandContext.Channel.IsPrivate)
+				{
+					CustomDebugInfo.LogInfo("Bot unsilenced in DM channel from " + commandContext.User.Username);
+				}
+				else
+				{
+					CustomDebugInfo.LogInfo("Bot unsilenced in '" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "'");
+				}
 			}
 		}
 	}

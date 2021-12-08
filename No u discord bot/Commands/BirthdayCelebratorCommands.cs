@@ -31,6 +31,8 @@ namespace No_u_discord_bot.Commands
 			birthdayDataJson.UserBirthDays.Add(commandContext.User.Id, birthday);
 			JsonParser.GetInstance().SaveData(birthdayDataJson);
 			await commandContext.Channel.SendMessageAsync("I have written your birthdate down :smile:").ConfigureAwait(false);
+
+			CustomDebugInfo.LogInfo(commandContext.User.Username + "'s birthday added at " + birthday.ToString());
 		}
 
 		[Command("bdLink"), Description("Syntax: $[Command]\nSet this channel to send all happy birhtday wishes"), CommandCustomGroupAttribute("Birthday celebrator")]
@@ -46,6 +48,15 @@ namespace No_u_discord_bot.Commands
 			birthdayDataJson.RegisteredChannels.Add(commandContext.Channel.Id);
 			JsonParser.GetInstance().SaveData(birthdayDataJson);
 			await commandContext.Channel.SendMessageAsync("I will use this channel to send birthday wishes :smile:").ConfigureAwait(false);
+
+			if (commandContext.Channel.IsPrivate)
+			{
+				CustomDebugInfo.LogInfo("DM channel linked for birthdays by " + commandContext.User.Username);
+			}
+			else
+			{
+				CustomDebugInfo.LogInfo("'" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "' is linked for birthday reminders");
+			}
 		}
 
 		[Command("bdUnLink"), Description("Syntax: $[Command]\nUnset this channel to send all happy birhtday wishes"), CommandCustomGroupAttribute("Birthday celebrator")]
@@ -61,6 +72,15 @@ namespace No_u_discord_bot.Commands
 			birthdayDataJson.RegisteredChannels.Remove(commandContext.Channel.Id);
 			JsonParser.GetInstance().SaveData(birthdayDataJson);
 			await commandContext.Channel.SendMessageAsync("I will stop using this channel to send birthday wishes").ConfigureAwait(false);
+
+			if (commandContext.Channel.IsPrivate)
+			{
+				CustomDebugInfo.LogInfo("DM channel unlinked for birthdays by " + commandContext.User.Username);
+			}
+			else
+			{
+				CustomDebugInfo.LogInfo("'" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "' is unlinked for birthday reminders");
+			}
 		}
 
 		private bool GivenDateValid(int month, int day)

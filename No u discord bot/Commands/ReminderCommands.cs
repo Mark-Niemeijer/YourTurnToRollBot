@@ -47,6 +47,8 @@ namespace No_u_discord_bot.Commands
 			JsonParser.GetInstance().SaveData(currentRemindersList);
 
 			await commandContext.Channel.SendMessageAsync("Alright, I'll do my best to remind you :smile:").ConfigureAwait(false);
+			CustomDebugInfo.LogInfo("'" + commandContext.User.Username + "' needed to be reminded of: '" + Message + "' at this date: " + currentRemindersList.DateReminder);
+
 		}
 	}
 }

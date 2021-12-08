@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.EventArgs;
+using No_u_discord_bot.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +15,7 @@ namespace No_u_discord_bot.NonCommandCommands
 			for (int i = 0; i < e.MentionedUsers.Count; i++)
 			{
 				await e.Message.RespondAsync("You are welcome " + e.Message.Author.Mention);
+				CustomDebugInfo.LogInfo("Accepted thanks from " + e.Author.Username);
 			}
 		}
 
