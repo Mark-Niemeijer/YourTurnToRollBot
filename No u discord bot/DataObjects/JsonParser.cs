@@ -28,7 +28,7 @@ namespace No_u_discord_bot.DataObjects
 			fileLocations.Add(FileEnum.ReminderFile, "DataObjects//ReminderList.json");
 		}
 
-		public T LoadData<T>(FileEnum filePath)
+		public T LoadData<T>(FileEnum filePath) where T : IDataFile
 		{
 			string json = string.Empty;
 			using (FileStream fileStream = File.OpenRead(fileLocations[filePath]))
@@ -39,6 +39,7 @@ namespace No_u_discord_bot.DataObjects
 				}
 			}
 			T jsonOutput = JsonConvert.DeserializeObject<T>(json);
+			jsonOutput.ValidateData();
 
 			return jsonOutput;
 		}

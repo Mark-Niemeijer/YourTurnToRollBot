@@ -5,9 +5,14 @@ using System.Text;
 
 namespace No_u_discord_bot.DataObjects
 {
-	class WordListJson
+	class WordListJson : IDataFile
 	{
 		[JsonProperty("words")]
 		public string[] WordArray { get; private set; }
+
+		public void ValidateData()
+		{
+			if (WordArray == null) WordArray = new string[] { };
+		}
 	}
 }
