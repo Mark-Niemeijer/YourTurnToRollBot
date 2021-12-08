@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.EventArgs;
+using No_u_discord_bot.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,6 +17,7 @@ namespace No_u_discord_bot.NonCommandCommands
 		{
 			Random numberGenerator = new Random();
 			await e.Message.RespondAsync(goodbyeResponces[numberGenerator.Next(0, goodbyeResponces.Length)]);
+			CustomDebugInfo.LogInfo("Whished goodnight to " + e.Author.Username);
 		}
 
 		public bool MeetsRequirements(MessageCreateEventArgs e, DiscordClient botClient, string loweredMessage)

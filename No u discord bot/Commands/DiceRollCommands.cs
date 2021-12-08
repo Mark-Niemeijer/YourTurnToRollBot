@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using No_u_discord_bot.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,6 +91,16 @@ namespace No_u_discord_bot.Commands
 			else
 			{
 				await commandContext.Channel.SendMessageAsync(resultMessage).ConfigureAwait(false);
+			}
+
+
+			if (commandContext.Channel.IsPrivate)
+			{
+				CustomDebugInfo.LogInfo(commandContext.User.Username + " rolled a combined " + total + " in their DM channel");
+			}
+			else
+			{
+				CustomDebugInfo.LogInfo(commandContext.User.Username + " rolled a combined " + total + " in '" + commandContext.Channel.Name + "' within '" + commandContext.Channel.Guild.Name + "'");
 			}
 		}
 

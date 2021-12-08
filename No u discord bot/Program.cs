@@ -1,4 +1,5 @@
-﻿using System;
+﻿using No_u_discord_bot.Helpers;
+using System;
 
 namespace No_u_discord_bot
 {
@@ -6,7 +7,7 @@ namespace No_u_discord_bot
 	{
 		static void Main(string[] args)
 		{
-			Console.WriteLine("Preparing bot startup");
+			CustomDebugInfo.LogInfo("Preparing bot startup");
 			Bot discordBot = new Bot();
 			discordBot.RunBotAsync().GetAwaiter().GetResult();
 		}

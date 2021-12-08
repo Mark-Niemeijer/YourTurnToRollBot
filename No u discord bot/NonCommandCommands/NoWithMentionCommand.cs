@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using No_u_discord_bot.Helpers;
 
 namespace No_u_discord_bot.NonCommandCommands
 {
@@ -14,6 +15,7 @@ namespace No_u_discord_bot.NonCommandCommands
 			for (int i = 0; i < e.MentionedUsers.Count; i++)
 			{
 				await e.Message.RespondAsync("Yes " + e.Message.Author.Mention);
+				CustomDebugInfo.LogInfo("Replied yes to " + e.Author.Username);
 			}
 		}
 

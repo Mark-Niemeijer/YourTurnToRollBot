@@ -47,7 +47,7 @@ namespace No_u_discord_bot.LooseSystems
 							{
 								await channel.SendMessageAsync("Happy birthday " + birthDayUser.Mention + " :heart: :partying_face:").ConfigureAwait(false);
 								birthdayData.UserBirthDays[birthDayUser.Id] = birthdayData.UserBirthDays[birthDayUser.Id].AddYears(1);
-								JsonParser.GetInstance().SaveData(JsonParser.FileEnum.BirthdayFile, birthdayData);
+								JsonParser.GetInstance().SaveData(birthdayData);
 							}
 						}
 						registerdChannelsWithMembers.Add(channel, membersOfChannel);

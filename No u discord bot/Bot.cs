@@ -67,7 +67,7 @@ namespace No_u_discord_bot
 		{
 			BirthDayTimer.StartDateChecker(sender);
 			ReminderTimer.StartDateChecker(sender);
-			Console.WriteLine("Bot ready to go");
+			CustomDebugInfo.LogInfo("Bot ready to go");
 			return Task.CompletedTask;
 		}
 	}

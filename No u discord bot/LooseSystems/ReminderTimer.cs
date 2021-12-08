@@ -43,7 +43,7 @@ namespace No_u_discord_bot.LooseSystems
 						reminderFile.RemindInChannel.RemoveAt(i);
 						reminderFile.DateReminder.RemoveAt(i);
 						reminderFile.ReminderMessage.RemoveAt(i);
-						JsonParser.GetInstance().SaveData(JsonParser.FileEnum.ReminderFile, reminderFile);
+						JsonParser.GetInstance().SaveData(reminderFile);
 						i--;
 
 						if(currentTime == dateReminder)

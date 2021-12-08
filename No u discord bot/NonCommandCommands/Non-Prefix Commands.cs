@@ -36,7 +36,6 @@ namespace No_u_discord_bot.NonCommandCommands
 			{
 				if(command.MeetsRequirements(e, sender, loweredMessage))
 				{
-					Console.WriteLine("None-command fired");
 					await command.ExcuteCommand(e, sender);
 					break;
 				}
