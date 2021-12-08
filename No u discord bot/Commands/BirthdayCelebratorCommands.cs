@@ -29,7 +29,7 @@ namespace No_u_discord_bot.Commands
 			DateTime birthday = new DateTime(DateTime.Now.Year, month, day);
 			if (DateTime.Now > birthday) birthday.AddYears(1);
 			birthdayDataJson.UserBirthDays.Add(commandContext.User.Id, birthday);
-			JsonParser.GetInstance().SaveData(JsonParser.FileEnum.BirthdayFile, birthdayDataJson);
+			JsonParser.GetInstance().SaveData(birthdayDataJson);
 			await commandContext.Channel.SendMessageAsync("I have written your birthdate down :smile:").ConfigureAwait(false);
 		}
 
@@ -44,7 +44,7 @@ namespace No_u_discord_bot.Commands
 			}
 
 			birthdayDataJson.RegisteredChannels.Add(commandContext.Channel.Id);
-			JsonParser.GetInstance().SaveData(JsonParser.FileEnum.BirthdayFile, birthdayDataJson);
+			JsonParser.GetInstance().SaveData(birthdayDataJson);
 			await commandContext.Channel.SendMessageAsync("I will use this channel to send birthday wishes :smile:").ConfigureAwait(false);
 		}
 
@@ -59,7 +59,7 @@ namespace No_u_discord_bot.Commands
 			}
 
 			birthdayDataJson.RegisteredChannels.Remove(commandContext.Channel.Id);
-			JsonParser.GetInstance().SaveData(JsonParser.FileEnum.BirthdayFile, birthdayDataJson);
+			JsonParser.GetInstance().SaveData(birthdayDataJson);
 			await commandContext.Channel.SendMessageAsync("I will stop using this channel to send birthday wishes").ConfigureAwait(false);
 		}
 

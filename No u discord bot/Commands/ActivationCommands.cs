@@ -21,7 +21,7 @@ namespace No_u_discord_bot.Commands
 			{
 				silentServerIdList.Add(commandContext.Channel.Id);
 				configJson.SilencedServerArray = silentServerIdList.ToArray();
-				JsonParser.GetInstance().SaveData(JsonParser.FileEnum.ConfigFile, configJson);
+				JsonParser.GetInstance().SaveData(configJson);
 				await commandContext.Channel.SendMessageAsync("Alright :(").ConfigureAwait(false);
 			}
 		}
@@ -36,7 +36,7 @@ namespace No_u_discord_bot.Commands
 			{
 				silentServerIdList.Remove(commandContext.Channel.Id);
 				configJson.SilencedServerArray = silentServerIdList.ToArray();
-				JsonParser.GetInstance().SaveData(JsonParser.FileEnum.ConfigFile, configJson);
+				JsonParser.GetInstance().SaveData(configJson);
 				await commandContext.Channel.SendMessageAsync("Yaaaaaay :)").ConfigureAwait(false);
 			}
 		}

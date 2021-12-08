@@ -44,7 +44,7 @@ namespace No_u_discord_bot.Commands
 			currentRemindersList.ReminderMessage.Add(Message);
 			currentRemindersList.RemindInChannel.Add(commandContext.Channel.Id);
 
-			JsonParser.GetInstance().SaveData(JsonParser.FileEnum.ReminderFile, currentRemindersList);
+			JsonParser.GetInstance().SaveData(currentRemindersList);
 
 			await commandContext.Channel.SendMessageAsync("Alright, I'll do my best to remind you :smile:").ConfigureAwait(false);
 		}
