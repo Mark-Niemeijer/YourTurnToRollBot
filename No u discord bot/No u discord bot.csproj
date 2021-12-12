@@ -10,6 +10,7 @@
     <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00813" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00813" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00813" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,9 +23,25 @@
     <None Update="DataObjects\ReminderList.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="DataObjects\RPGMaps\TextFile1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DataObjects\RPGTiles\Tile1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DataObjects\RPGTiles\Tile2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DataObjects\RPGTiles\Tile3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="DataObjects\WordList.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
 
 </Project>

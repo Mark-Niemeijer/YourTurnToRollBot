@@ -50,6 +50,7 @@ namespace No_u_discord_bot
 			Commands.RegisterCommands<PetCommand>();
 			Commands.RegisterCommands<BirthdayCelebratorCommands>();
 			Commands.RegisterCommands<ReminderCommands>();
+			Commands.RegisterCommands<RPGCommands>();
 
 
 			Client.UseInteractivity(new InteractivityConfiguration()
@@ -68,6 +69,7 @@ namespace No_u_discord_bot
 			BirthDayTimer.StartDateChecker(sender);
 			ReminderTimer.StartDateChecker(sender);
 			CustomDebugInfo.LogInfo("Bot ready to go");
+
 			return Task.CompletedTask;
 		}
 	}
