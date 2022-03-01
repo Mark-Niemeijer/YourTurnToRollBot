@@ -14,15 +14,36 @@ namespace No_u_discord_bot.Commands
 {
 	class RPGCommands : BaseCommandModule
 	{
+		//[Command("DisplayMap"), Description("Syntax: $[Command]\nStops the bot from reacting to non-command sentences"), CommandCustomGroupAttribute("NonCommand Commands")]
+		//public async Task DisplayMap(CommandContext commandContext)
+		//{
+		//	RPGMapGenerator mapGenerator = new RPGMapGenerator();
+		//	Bitmap RPGMap = mapGenerator.GenerateMap();
+
+		//	using (FileStream stream = File.Create(Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + commandContext.Channel.Id + ".png"))
+		//	{
+		//		RPGMap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+		//	}
+
+		//	using (FileStream stream = File.Open(Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + commandContext.Channel.Id + ".png", FileMode.Open))
+		//	{
+		//		DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
+		//		messageBuilder.WithFile(stream);
+		//		await commandContext.Channel.SendMessageAsync(messageBuilder);
+		//	}
+		//}
+
 		[Command("DisplayMap"), Description("Syntax: $[Command]\nStops the bot from reacting to non-command sentences"), CommandCustomGroupAttribute("NonCommand Commands")]
 		public async Task DisplayMap(CommandContext commandContext)
 		{
-			RPGMapGenerator mapGenerator = new RPGMapGenerator();
-			Bitmap RPGMap = mapGenerator.GenerateMap();
+			await commandContext.Channel.SendMessageAsync("Generating map");
+			MushroomRPG.MRPGMapGenerator mapGenerator = new MushroomRPG.MRPGMapGenerator(20, 20);
+			MushroomRPG.MRPGMapVisualizer mapVisualizer = new MushroomRPG.MRPGMapVisualizer();
+			Bitmap visualMap = mapVisualizer.VisualizeMap(mapGenerator);
 
 			using (FileStream stream = File.Create(Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + commandContext.Channel.Id + ".png"))
 			{
-				RPGMap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+				visualMap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
 			}
 
 			using (FileStream stream = File.Open(Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + commandContext.Channel.Id + ".png", FileMode.Open))
