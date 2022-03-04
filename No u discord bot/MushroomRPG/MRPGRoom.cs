@@ -8,6 +8,8 @@ namespace No_u_discord_bot.MushroomRPG
 	{
 		public int RoomHeight { get; private set; }
 		public int RoomWidth { get; private set; }
+		public MRPGIntVector2 minVector;
+		public MRPGIntVector2 maxVector;
 
 		public MRPGRoom(int height, int width)
 		{

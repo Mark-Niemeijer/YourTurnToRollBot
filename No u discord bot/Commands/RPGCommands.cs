@@ -36,9 +36,11 @@ namespace No_u_discord_bot.Commands
 		[Command("DisplayMap"), Description("Syntax: $[Command]\nStops the bot from reacting to non-command sentences"), CommandCustomGroupAttribute("NonCommand Commands")]
 		public async Task DisplayMap(CommandContext commandContext)
 		{
+			DateTime startDisplay = DateTime.Now;
 			await commandContext.Channel.SendMessageAsync("Generating map");
-			MushroomRPG.MRPGMapGenerator mapGenerator = new MushroomRPG.MRPGMapGenerator(20, 20);
+			MushroomRPG.MRPGMapGenerator mapGenerator = new MushroomRPG.MRPGMapGenerator(100, 100);
 			MushroomRPG.MRPGMapVisualizer mapVisualizer = new MushroomRPG.MRPGMapVisualizer();
+			await commandContext.Channel.SendMessageAsync("Map generated, visualizing");
 			Bitmap visualMap = mapVisualizer.VisualizeMap(mapGenerator);
 
 			using (FileStream stream = File.Create(Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + commandContext.Channel.Id + ".png"))
@@ -52,6 +54,10 @@ namespace No_u_discord_bot.Commands
 				messageBuilder.WithFile(stream);
 				await commandContext.Channel.SendMessageAsync(messageBuilder);
 			}
+			DateTime endDisplay = DateTime.Now;
+			TimeSpan secondsWaiting = endDisplay - startDisplay;
+			await commandContext.Channel.SendMessageAsync("Time needed to generate: " + secondsWaiting.Seconds + " seconds");
+
 		}
 	}
 }

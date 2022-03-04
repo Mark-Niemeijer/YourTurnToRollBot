@@ -18,7 +18,7 @@ namespace No_u_discord_bot.MushroomRPG
 			_rooms = new List<MRPGRoom>();
 			Rows = rows;
 			Collumns = collumns;
-			GenerateMap(5);
+			GenerateMap(30);
 		}
 
 		private void GenerateMap(int rooms)
@@ -37,35 +37,42 @@ namespace No_u_discord_bot.MushroomRPG
 
 			for (int i = 0; i < rooms; i++)
 			{
-				MRPGRoom room = new MRPGRoom(numberGenerator.Next(3, 7), numberGenerator.Next(3, 7));
-				MRPGIntVector2 roomSizedHalved = new MRPGIntVector2((int)MathF.Floor(room.RoomWidth / 2f), (int)MathF.Floor(room.RoomHeight / 2f));
+				MRPGRoom newRoom = new MRPGRoom(numberGenerator.Next(3, 7), numberGenerator.Next(3, 7));
+				MRPGIntVector2 roomSizedHalved = new MRPGIntVector2((int)MathF.Floor(newRoom.RoomWidth / 2f), (int)MathF.Floor(newRoom.RoomHeight / 2f));
 				MRPGIntVector2 roomLocation;
+				int offsetLeft = (int)MathF.Floor((newRoom.RoomWidth) / 2f);
+				int offsetTop = (int)MathF.Floor((newRoom.RoomHeight) / 2f);
 
-				bool locationAvailable = false;
+				bool locationAvailable = true;
 				do
 				{
-					//Fix room availability detection - box box collisions
 					roomLocation = new MRPGIntVector2(numberGenerator.Next(0 + roomSizedHalved.X, Rows - roomSizedHalved.X), 
 													  numberGenerator.Next(0 + roomSizedHalved.Y, Collumns - roomSizedHalved.Y));
+					newRoom.minVector = new MRPGIntVector2(roomLocation.X - offsetLeft, roomLocation.Y - offsetTop);
+					newRoom.maxVector = new MRPGIntVector2(roomLocation.X - offsetLeft + newRoom.RoomWidth, roomLocation.Y - offsetTop + newRoom.RoomHeight);
 
-					if(GeneratedMap[roomLocation.Y][roomLocation.X].TileFuntion == null)
+					foreach (MRPGRoom room in _rooms)
 					{
-						locationAvailable = true;
+						locationAvailable = newRoom.maxVector.X < room.minVector.X ||
+											newRoom.minVector.X > room.maxVector.X ||
+											newRoom.minVector.Y > room.maxVector.Y ||
+											newRoom.maxVector.Y < room.minVector.Y;
+						if(!locationAvailable)
+						{ 
+							break;
+						}
 					}
 				}
 				while (!locationAvailable);
 
-				int offsetLeft = (int)MathF.Floor((room.RoomWidth - 1) / 2f);
-				int offsetTop = (int)MathF.Ceiling((room.RoomHeight - 1) / 2f);
-
-				for (int j = 0; j < room.RoomWidth; j++)
+				for (int j = newRoom.minVector.X; j < newRoom.maxVector.X; j++)
 				{
-					for (int jj = 0; jj < room.RoomHeight; jj++)
+					for (int jj = newRoom.minVector.Y; jj < newRoom.maxVector.Y; jj++)
 					{
-						GeneratedMap[roomLocation.X + j - offsetLeft][roomLocation.X + jj - offsetTop].TileFuntion = room;
+						GeneratedMap[j][jj].TileFuntion = newRoom;
 					}
 				}
-				_rooms.Add(room);
+				_rooms.Add(newRoom);
 			}
 		}
 	}
