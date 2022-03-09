@@ -38,7 +38,7 @@ namespace No_u_discord_bot.Commands
 		{
 			DateTime startDisplay = DateTime.Now;
 			await commandContext.Channel.SendMessageAsync("Generating map");
-			MushroomRPG.MRPGMapGenerator mapGenerator = new MushroomRPG.MRPGMapGenerator(100, 100);
+			MushroomRPG.MRPGMapGenerator mapGenerator = new MushroomRPG.MRPGMapGenerator(50, 50);
 			MushroomRPG.MRPGMapVisualizer mapVisualizer = new MushroomRPG.MRPGMapVisualizer();
 			await commandContext.Channel.SendMessageAsync("Map generated, visualizing");
 			Bitmap visualMap = mapVisualizer.VisualizeMap(mapGenerator);

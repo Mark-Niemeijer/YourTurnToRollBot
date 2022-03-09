@@ -11,11 +11,7 @@ namespace No_u_discord_bot.MushroomRPG
 		private readonly int verticalImageSize = 50;
 		private readonly Bitmap RoomTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\Tile1.png");
 		private readonly Bitmap WallTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\Tile2.png");
-
-		public MRPGMapVisualizer()
-		{
-
-		}
+		private readonly Bitmap PathTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\Tile3.png");
 
 		public Bitmap VisualizeMap(MRPGMapGenerator mapGenerator)
 		{
@@ -43,7 +39,21 @@ namespace No_u_discord_bot.MushroomRPG
 					int mapCollumn = (int)Math.Floor(j / (float)horizontalImageSize);
 					int mapRow = (int)Math.Floor(i / (float)verticalImageSize);
 					MRPGMapTile tile = mapGenerator.GeneratedMap[mapCollumn][mapRow];
-					Bitmap BitmapForTile = tile.TileFuntion != null ? RoomTile : WallTile;
+					Bitmap BitmapForTile = null;
+
+					if (tile.TileFuntion == null)
+					{
+						BitmapForTile = WallTile;
+					}
+					else if(tile.TileFuntion.GetType() == typeof(MRPGPath))
+					{
+						BitmapForTile = PathTile;
+					}
+					else if(tile.TileFuntion.GetType() == typeof(MRPGRoom))
+					{
+						BitmapForTile = RoomTile;
+					}
+
 					int tilePixelX = j % horizontalImageSize;
 					int tilePixelY = i % verticalImageSize;
 
