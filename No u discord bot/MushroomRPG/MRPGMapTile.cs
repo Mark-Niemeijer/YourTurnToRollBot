@@ -6,13 +6,11 @@ namespace No_u_discord_bot.MushroomRPG
 {
 	class MRPGMapTile
 	{
-		public int X { get; private set; }
-		public int Y { get; private set; }
+		public MRPGIntVector2 position { get; private set; }
 		public MRPGTileElement TileFuntion;
 		public MRPGMapTile(int x, int y)
 		{
-			this.X = x;
-			this.Y = y;
+			position = new MRPGIntVector2(x, y);
 		}
 	}
 }

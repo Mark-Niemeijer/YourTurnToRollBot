@@ -38,10 +38,10 @@ namespace No_u_discord_bot.MushroomRPG
 			MRPGIntVector2 centerRight = new MRPGIntVector2(maxVector.X, (int)Math.Floor((minVector.Y + maxVector.Y) / 2f));
 			MRPGIntVector2 centerTop = new MRPGIntVector2((int)Math.Floor((minVector.X + maxVector.X) / 2f), maxVector.Y);
 			MRPGIntVector2 centerBottom = new MRPGIntVector2((int)Math.Floor((minVector.X + maxVector.X) / 2f), minVector.Y);
-			TopEntrance = RoomTiles.FirstOrDefault(i => centerTop.X == i.X && centerTop.Y == i.Y);
-			BottomEntrance = RoomTiles.FirstOrDefault(i => centerBottom.X == i.X && centerBottom.Y == i.Y);
-			RightEntrance = RoomTiles.FirstOrDefault(i => centerRight.X == i.X && centerRight.Y == i.Y);
-			LeftEntrance = RoomTiles.FirstOrDefault(i => centerLeft.X == i.X && centerLeft.Y == i.Y);
+			TopEntrance = RoomTiles.FirstOrDefault(i => centerTop.X == i.position.X && centerTop.Y == i.position.Y);
+			BottomEntrance = RoomTiles.FirstOrDefault(i => centerBottom.X == i.position.X && centerBottom.Y == i.position.Y);
+			RightEntrance = RoomTiles.FirstOrDefault(i => centerRight.X == i.position.X && centerRight.Y == i.position.Y);
+			LeftEntrance = RoomTiles.FirstOrDefault(i => centerLeft.X == i.position.X && centerLeft.Y == i.position.Y);
 		}
 	}
 }
