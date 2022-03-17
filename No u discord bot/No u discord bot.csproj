@@ -26,6 +26,12 @@
     <None Update="DataObjects\RPGMaps\TextFile1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="DataObjects\RPGTiles\PathTile.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataObjects\RPGTiles\RoomTile.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="DataObjects\RPGTiles\Tile1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -34,6 +40,9 @@
     </None>
     <None Update="DataObjects\RPGTiles\Tile3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DataObjects\RPGTiles\WallTile.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="DataObjects\WordList.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

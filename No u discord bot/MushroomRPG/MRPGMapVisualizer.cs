@@ -9,55 +9,35 @@ namespace No_u_discord_bot.MushroomRPG
 	{
 		private readonly int horizontalImageSize = 50;
 		private readonly int verticalImageSize = 50;
-		private readonly Bitmap RoomTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\Tile1.png");
-		private readonly Bitmap WallTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\Tile2.png");
-		private readonly Bitmap PathTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\Tile3.png");
+		private readonly Bitmap RoomTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\RoomTile.png");
+		private readonly Bitmap WallTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\WallTile.png");
+		private readonly Bitmap PathTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\PathTile.png");
 
 		public Bitmap VisualizeMap(MRPGMapGenerator mapGenerator)
 		{
 			Bitmap MapImage = new Bitmap(mapGenerator.Rows * horizontalImageSize, mapGenerator.Collumns * verticalImageSize);
-			//for (int i = 0; i < mapGenerator.Rows; i++)
-			//{
-			//	for (int ii = 0; ii < mapGenerator.Collumns; ii++)
-			//	{
-			//		bool tileIsRoom = mapGenerator.GeneratedMap[ii][i].TileFuntion != null;
-			//		Bitmap BitmapForTile = tileIsRoom ? RoomTile : WallTile;
-
-			//		for (int j = 0; j < horizontalImageSize; j++)
-			//		{
-			//			for (int jj = 0; jj < verticalImageSize; jj++)
-			//			{
-			//				MapImage.SetPixel(j + (ii * verticalImageSize), jj + (i * horizontalImageSize), BitmapForTile.GetPixel(j, jj));
-			//			}
-			//		}
-			//	}
-			//}
-			for (int i = 0; i < MapImage.Height; i++)
+			using (Graphics graphics = Graphics.FromImage(MapImage))
 			{
-				for (int j = 0; j < MapImage.Width; j++)
+				for (int i = 0; i < mapGenerator.Collumns; i++)
 				{
-					int mapCollumn = (int)Math.Floor(j / (float)horizontalImageSize);
-					int mapRow = (int)Math.Floor(i / (float)verticalImageSize);
-					MRPGMapTile tile = mapGenerator.GeneratedMap[mapCollumn][mapRow];
-					Bitmap BitmapForTile = null;
-
-					if (tile.TileFuntion == null)
+					for (int j = 0; j < mapGenerator.Rows; j++)
 					{
-						BitmapForTile = WallTile;
+						MRPGMapTile tile = mapGenerator.GeneratedMap[i][j];
+						Bitmap BitmapForTile = null;
+						if (tile.TileFuntion == null)
+						{
+							BitmapForTile = WallTile;
+						}
+						else if (tile.TileFuntion.GetType() == typeof(MRPGPath))
+						{
+							BitmapForTile = PathTile;
+						}
+						else if (tile.TileFuntion.GetType() == typeof(MRPGRoom))
+						{
+							BitmapForTile = RoomTile;
+						}
+						graphics.DrawImage(BitmapForTile, new Point(i * horizontalImageSize, j * verticalImageSize));
 					}
-					else if(tile.TileFuntion.GetType() == typeof(MRPGPath))
-					{
-						BitmapForTile = PathTile;
-					}
-					else if(tile.TileFuntion.GetType() == typeof(MRPGRoom))
-					{
-						BitmapForTile = RoomTile;
-					}
-
-					int tilePixelX = j % horizontalImageSize;
-					int tilePixelY = i % verticalImageSize;
-
-					MapImage.SetPixel(j, i, BitmapForTile.GetPixel(tilePixelX, tilePixelY));
 				}
 			}
 
