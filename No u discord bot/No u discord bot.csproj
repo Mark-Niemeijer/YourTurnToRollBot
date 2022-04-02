@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00813" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00813" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00813" />
-    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
+    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01105" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01105" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01105" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0-preview.2.22152.2" />
   </ItemGroup>
 
   <ItemGroup>
