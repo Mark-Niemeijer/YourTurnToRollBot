@@ -33,6 +33,7 @@ namespace No_u_discord_bot
 			Client = new DiscordClient(discordConfig);
 			Client.Ready += OnClientReady;
 			Client.MessageCreated += new Non_Prefix_Commands().OnClientMessageCreated;
+			Client.ClientErrored += Client_ClientErrored;
 
 			CommandsNextConfiguration commandsNextConfig = new CommandsNextConfiguration();
 			commandsNextConfig.StringPrefixes = configJson.CommandPrefixs;
@@ -51,7 +52,7 @@ namespace No_u_discord_bot
 			Commands.RegisterCommands<BirthdayCelebratorCommands>();
 			Commands.RegisterCommands<ReminderCommands>();
 			Commands.RegisterCommands<RPGCommands>();
-
+			Commands.CommandErrored += Commands_CommandErrored;
 
 			Client.UseInteractivity(new InteractivityConfiguration()
 			{
@@ -62,6 +63,18 @@ namespace No_u_discord_bot
 			await Client.ConnectAsync();
 			//Keep bot running
 			await Task.Delay(-1);
+		}
+
+		private Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
+		{
+			CustomDebugInfo.LogError("Command " + e.Command.Name + " threw an exception:\n" + e.Exception);
+			return Task.CompletedTask;
+		}
+
+		private Task Client_ClientErrored(DiscordClient sender, DSharpPlus.EventArgs.ClientErrorEventArgs e)
+		{
+			CustomDebugInfo.LogError("Event " + e.EventName + " threw an exception:\n" + e.Exception);
+			return Task.CompletedTask;
 		}
 
 		private Task OnClientReady(DiscordClient sender, DSharpPlus.EventArgs.ReadyEventArgs e)

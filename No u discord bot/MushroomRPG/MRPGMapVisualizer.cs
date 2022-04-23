@@ -13,7 +13,7 @@ namespace No_u_discord_bot.MushroomRPG
 		private readonly Bitmap WallTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\WallTile.png");
 		private readonly Bitmap PathTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\PathTile.png");
 
-		public Bitmap VisualizeMap(MRPGMapGenerator mapGenerator)
+		public Bitmap VisualizeBackGround(MRPGMapGenerator mapGenerator)
 		{
 			Bitmap MapImage = new Bitmap(mapGenerator.Rows * horizontalImageSize, mapGenerator.Collumns * verticalImageSize);
 			using (Graphics graphics = Graphics.FromImage(MapImage))
@@ -42,6 +42,34 @@ namespace No_u_discord_bot.MushroomRPG
 			}
 
 			return MapImage;
+		}
+
+		public Bitmap VisualizePlayerView(Bitmap fullMap, MRPGCharacter character)
+		{
+			Bitmap playerVision = new Bitmap(horizontalImageSize * (character.SightRadius * 2 + 1), verticalImageSize * (character.SightRadius * 2 + 1));
+			using (Graphics playerVisionGraphics = Graphics.FromImage(playerVision))
+			{
+				int characterImageLocationX = character.GridLocation.X * horizontalImageSize;
+				int characterImageLocationY = character.GridLocation.Y * verticalImageSize;
+				int offset = character.SightRadius * horizontalImageSize;
+				playerVisionGraphics.DrawImage(fullMap, new Rectangle(0, 0, playerVision.Width, playerVision.Height),
+					new Rectangle(characterImageLocationX - offset, characterImageLocationY - offset, 
+					offset * 2 + horizontalImageSize, offset * 2 + verticalImageSize), GraphicsUnit.Pixel);
+			}
+			return playerVision;
+		}
+
+		public Bitmap PlaceTokens(Bitmap background, List<MRPGToken> tokens)
+		{
+			Bitmap backgroundWithTokens = new Bitmap(background);
+			using (Graphics graphics = Graphics.FromImage(backgroundWithTokens))
+			{
+				foreach (MRPGToken token in tokens)
+				{
+					graphics.DrawImage(token.Icon, new Point(token.GridLocation.X * horizontalImageSize, token.GridLocation.Y * verticalImageSize));
+				}
+			}
+			return backgroundWithTokens;
 		}
 	}
 }

@@ -10,7 +10,7 @@
     <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01105" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01105" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01105" />
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0-preview.2.22152.2" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +43,9 @@
     </None>
     <None Update="DataObjects\RPGTiles\WallTile.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataObjects\RPGTokens\HumanWarrior.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DataObjects\WordList.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

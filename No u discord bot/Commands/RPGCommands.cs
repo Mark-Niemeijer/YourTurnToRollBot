@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using No_u_discord_bot.Helpers;
+using No_u_discord_bot.InBotAppManagers;
 using No_u_discord_bot.LooseSystems;
 using System;
 using System.Collections.Generic;
@@ -14,50 +15,99 @@ namespace No_u_discord_bot.Commands
 {
 	class RPGCommands : BaseCommandModule
 	{
-		//[Command("DisplayMap"), Description("Syntax: $[Command]\nStops the bot from reacting to non-command sentences"), CommandCustomGroupAttribute("NonCommand Commands")]
-		//public async Task DisplayMap(CommandContext commandContext)
-		//{
-		//	RPGMapGenerator mapGenerator = new RPGMapGenerator();
-		//	Bitmap RPGMap = mapGenerator.GenerateMap();
+		private Dictionary<DiscordChannel, MRPGGameManager> _activeGames;
 
-		//	using (FileStream stream = File.Create(Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + commandContext.Channel.Id + ".png"))
-		//	{
-		//		RPGMap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-		//	}
-
-		//	using (FileStream stream = File.Open(Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + commandContext.Channel.Id + ".png", FileMode.Open))
-		//	{
-		//		DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
-		//		messageBuilder.WithFile(stream);
-		//		await commandContext.Channel.SendMessageAsync(messageBuilder);
-		//	}
-		//}
-
-		[Command("DisplayMap"), Description("Syntax: $[Command]\nStops the bot from reacting to non-command sentences"), CommandCustomGroupAttribute("NonCommand Commands")]
-		public async Task DisplayMap(CommandContext commandContext)
+		[Command("RPGStart"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
+		public async Task StartGame(CommandContext commandContext)
 		{
-			DateTime startDisplay = DateTime.Now;
-			await commandContext.Channel.SendMessageAsync("Generating map");
-			MushroomRPG.MRPGMapGenerator mapGenerator = new MushroomRPG.MRPGMapGenerator(50, 50);
-			MushroomRPG.MRPGMapVisualizer mapVisualizer = new MushroomRPG.MRPGMapVisualizer();
-			await commandContext.Channel.SendMessageAsync("Map generated, visualizing");
-			Bitmap visualMap = mapVisualizer.VisualizeMap(mapGenerator);
+			if (_activeGames == null) _activeGames = new Dictionary<DiscordChannel, MRPGGameManager>();
 
-			using (FileStream stream = File.Create(Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + commandContext.Channel.Id + ".png"))
+			if (!_activeGames.ContainsKey(commandContext.Channel))
 			{
-				visualMap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+				MRPGGameManager newGameManager = new MRPGGameManager(commandContext.Channel);
+				_activeGames.Add(commandContext.Channel, newGameManager);
+			}
+			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
+
+			if(gameManager.GameStatus == MRPGGameManager.GameState.Lobby && gameManager.getCurrentPlayers().Count > 0)
+			{
+				await commandContext.Channel.SendMessageAsync("A game is already busy here, but maybe you can still join it");
+				return;
+			}
+			else if(gameManager.GameStatus == MRPGGameManager.GameState.Ingame)
+			{
+				await commandContext.Channel.SendMessageAsync("A game is already busy here. You can't join anymore");
+				return;
 			}
 
-			using (FileStream stream = File.Open(Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + commandContext.Channel.Id + ".png", FileMode.Open))
-			{
-				DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
-				messageBuilder.WithFile(stream);
-				await commandContext.Channel.SendMessageAsync(messageBuilder);
-			}
-			DateTime endDisplay = DateTime.Now;
-			TimeSpan secondsWaiting = endDisplay - startDisplay;
-			await commandContext.Channel.SendMessageAsync("Time needed to generate: " + secondsWaiting.Seconds + " seconds");
-
+			await commandContext.Channel.SendMessageAsync("Welcome to the " + commandContext.Client.CurrentUser.Mention + " tavern, are we starting a new adventure or continuing an old one?\n" +
+				"Make sure everyone is around the table before you start. Use the [RPGJoin] Command to come sit with us.\n" +
+				"When everyone is seated, use the [RPGNewGame] or [RPGLoadGame] command to start");
+			await JoinGame(commandContext);
 		}
+
+		[Command("RPGJoin"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
+		public async Task JoinGame(CommandContext commandContext)
+		{
+			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
+			{
+				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
+				return;
+			}
+			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
+
+			if (gameManager.GameStatus == MRPGGameManager.GameState.Lobby)
+			{
+				List<DiscordUser> playersInGame = gameManager.getCurrentPlayers();
+				if(playersInGame.Contains(commandContext.User))
+				{
+					await commandContext.Channel.SendMessageAsync("You are already at the table " + commandContext.User.Mention);
+				}
+				else
+				{
+					await commandContext.Channel.SendMessageAsync("Welcome to the table " + commandContext.User.Mention + ", lets have a great adventure");
+					gameManager.AddPlayer(commandContext.User);
+				}
+			}
+		}
+
+		[Command("RPGNewGame"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
+		public async Task BeginNewGame(CommandContext commandContext)
+		{
+			if(_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
+			{
+				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
+				return;
+			}
+			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
+
+			if(gameManager.GameStatus == MRPGGameManager.GameState.Lobby)
+			{
+				await commandContext.Channel.SendMessageAsync("I am going to make a dungeon for you, please wait a few seconds");
+				gameManager.StartNewGame();
+
+				await commandContext.Channel.SendMessageAsync("Map is ready, here it comes");
+				//string fullMapFilePath = gameManager.VisualizeFullMap();
+
+				//using (FileStream fullMapStream = File.Open(fullMapFilePath, FileMode.Open))
+				//{
+				//	DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
+				//	messageBuilder.WithFile(fullMapStream);
+				//	await commandContext.Channel.SendMessageAsync(messageBuilder);
+				//}
+
+				string playerViewFilePath = gameManager.VisualizePlayerView(commandContext.User);
+				using (FileStream playerViewStream = File.Open(playerViewFilePath, FileMode.Open))
+				{
+					DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
+					messageBuilder.WithFile(playerViewStream);
+					await commandContext.Channel.SendMessageAsync(messageBuilder);
+				}
+			}
+			else
+			{
+				await commandContext.Channel.SendMessageAsync("The adventure has already begun, no need to start it");
+			}
+		}		
 	}
 }

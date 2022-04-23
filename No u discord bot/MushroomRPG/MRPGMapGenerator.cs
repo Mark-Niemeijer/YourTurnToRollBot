@@ -15,18 +15,22 @@ namespace No_u_discord_bot.MushroomRPG
 		public int Rows { get; private set; }
 		public int Collumns { get; private set; }
 
-		public MRPGMapGenerator(int rows, int collumns)
+		public MRPGMapGenerator()
 		{
 			GeneratedMap = new Dictionary<int, List<MRPGMapTile>>();
 			_rooms = new List<MRPGRoom>();
-			Rows = rows;
-			Collumns = collumns;
-			GenerateMap(10);
 		}
 
-		private void GenerateMap(int rooms)
+		public void LoadFromFile(string FilePath)
+		{
+
+		}
+
+		public void GenerateNewMap(int rooms, int rows, int collumns)
 		{
 			Random numberGenerator = new Random();
+			Rows = rows;
+			Collumns = collumns;
 
 			// Prepare map
 			for (int i = 0; i < Collumns; i++)
@@ -50,6 +54,7 @@ namespace No_u_discord_bot.MushroomRPG
 
 				// Generate random locations until a open spot for the whole room is found
 				bool locationAvailable = true;
+				int placeChecks = 0;
 				do
 				{
 					roomLocation = new MRPGIntVector2(numberGenerator.Next(0 + roomSizedHalved.X, Rows - roomSizedHalved.X), 
@@ -69,8 +74,15 @@ namespace No_u_discord_bot.MushroomRPG
 							break;
 						}
 					}
+					placeChecks++;
 				}
-				while (!locationAvailable);
+				while (!locationAvailable && placeChecks < 10000);
+
+				if(placeChecks == 10000)
+				{
+					CustomDebugInfo.LogError("Not all rooms could be placed, random location attempts limit reached");
+					break;
+				}
 
 				// Tell all the tiles that a room occupies them now
 				List<MRPGMapTile> roomTiles = new List<MRPGMapTile>();
