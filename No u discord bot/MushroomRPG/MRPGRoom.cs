@@ -26,7 +26,7 @@ namespace No_u_discord_bot.MushroomRPG
 			ConnectedTo = new List<MRPGRoom>();
 		}
 
-		public void SetRoomSurface(List<MRPGMapTile> surfaceTiles)
+		public virtual void SetRoomSurface(List<MRPGMapTile> surfaceTiles)
 		{
 			RoomTiles = surfaceTiles;
 			SetRoomEntrances();

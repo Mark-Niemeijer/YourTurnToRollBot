@@ -32,7 +32,7 @@ namespace No_u_discord_bot.MushroomRPG
 						{
 							BitmapForTile = PathTile;
 						}
-						else if (tile.TileFuntion.GetType() == typeof(MRPGRoom))
+						else if (tile.TileFuntion is MRPGRoom)
 						{
 							BitmapForTile = RoomTile;
 						}

@@ -8,6 +8,8 @@ namespace No_u_discord_bot.MushroomRPG
 	class MRPGCharacter : MRPGToken
 	{
 		public int SightRadius;
+		public int MaxMovement;
+		public int CurrentMovement;
 		public MRPGCharacter(Bitmap icon) : base(icon)
 		{
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace No_u_discord_bot.InBotAppManagers
@@ -11,13 +12,14 @@ namespace No_u_discord_bot.InBotAppManagers
 	class MRPGGameManager
 	{
 		public enum GameState { Lobby, Ingame }
+		public GameState GameStatus { get; private set; }
 		private Dictionary<DiscordUser, MRPGCharacter> _currentPlayers;
 		private MRPGMapGenerator _mRPGMap;
 		private MRPGMapVisualizer _mapVisualizer;
 		private DiscordChannel _playingInChannel;
 		private string _fullMapLocation;
-		public GameState GameStatus { get; private set; }
 		private Bitmap playerToken;
+		private DiscordUser _currentUserTurn;
 
 		public MRPGGameManager(DiscordChannel channel)
 		{
@@ -35,6 +37,12 @@ namespace No_u_discord_bot.InBotAppManagers
 			GameStatus = GameState.Ingame;
 			_mRPGMap.GenerateNewMap(15, 30, 30);
 			Bitmap background = _mapVisualizer.VisualizeBackGround(_mRPGMap);
+
+			for (int i = 0; i < _currentPlayers.Values.Count; i++)
+			{
+				_currentPlayers.ElementAt(i).Value.SetLocation(_mRPGMap.StartingRoom.RoomTiles[i].position);
+			}
+
 			using (FileStream saveStream = File.Create(_fullMapLocation))
 			{
 				background.Save(saveStream, System.Drawing.Imaging.ImageFormat.Png);
@@ -73,15 +81,41 @@ namespace No_u_discord_bot.InBotAppManagers
 			if(!_currentPlayers.ContainsKey(discordUser))
 			{
 				MRPGCharacter playerCharacter = new MRPGCharacter(playerToken);
-				playerCharacter.SetLocation(new MRPGIntVector2(5, 5));
 				playerCharacter.SightRadius = 3;
+				playerCharacter.MaxMovement = 30;
+				playerCharacter.CurrentMovement = playerCharacter.MaxMovement;
 				_currentPlayers.Add(discordUser, playerCharacter);
+			}
+
+			if(_currentUserTurn == null)
+			{
+				_currentUserTurn = discordUser;
 			}
 		}
 
 		public List<DiscordUser> getCurrentPlayers()
 		{
 			return new List<DiscordUser>(_currentPlayers.Keys);
+		}
+
+		public void MoveCharacter(DiscordUser user, string coordinate)
+		{
+			if(_currentPlayers.ContainsKey(user) && _currentPlayers[user].CurrentMovement > 0)
+			{
+				MRPGCharacter controlledCharacter = _currentPlayers[user];
+				int CenterLetter = 65 + _currentPlayers[user].SightRadius;
+				int horizontalCoordinate = (int)coordinate.ToUpper()[0];
+				int verticalCoordinate = Convert.ToInt32(coordinate[1].ToString());
+				int horizontalOffset = horizontalCoordinate - CenterLetter;
+				int verticalOffset = verticalCoordinate - 1 - controlledCharacter.SightRadius;
+				MRPGIntVector2 offsetVector = new MRPGIntVector2(horizontalOffset, verticalOffset);
+				MRPGIntVector2 newLocation = controlledCharacter.GridLocation + offsetVector;
+				
+				if(_mRPGMap.GeneratedMap[newLocation.X][newLocation.Y].TileFuntion != null)
+				{
+					controlledCharacter.SetLocation(newLocation);
+				}
+			}
 		}
 	}
 }

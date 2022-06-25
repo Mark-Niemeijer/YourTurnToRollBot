@@ -29,12 +29,12 @@ namespace No_u_discord_bot.Commands
 			}
 			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
 
-			if(gameManager.GameStatus == MRPGGameManager.GameState.Lobby && gameManager.getCurrentPlayers().Count > 0)
+			if (gameManager.GameStatus == MRPGGameManager.GameState.Lobby && gameManager.getCurrentPlayers().Count > 0)
 			{
 				await commandContext.Channel.SendMessageAsync("A game is already busy here, but maybe you can still join it");
 				return;
 			}
-			else if(gameManager.GameStatus == MRPGGameManager.GameState.Ingame)
+			else if (gameManager.GameStatus == MRPGGameManager.GameState.Ingame)
 			{
 				await commandContext.Channel.SendMessageAsync("A game is already busy here. You can't join anymore");
 				return;
@@ -59,7 +59,7 @@ namespace No_u_discord_bot.Commands
 			if (gameManager.GameStatus == MRPGGameManager.GameState.Lobby)
 			{
 				List<DiscordUser> playersInGame = gameManager.getCurrentPlayers();
-				if(playersInGame.Contains(commandContext.User))
+				if (playersInGame.Contains(commandContext.User))
 				{
 					await commandContext.Channel.SendMessageAsync("You are already at the table " + commandContext.User.Mention);
 				}
@@ -74,40 +74,73 @@ namespace No_u_discord_bot.Commands
 		[Command("RPGNewGame"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
 		public async Task BeginNewGame(CommandContext commandContext)
 		{
-			if(_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
+			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
 			{
 				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
 				return;
 			}
 			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
 
-			if(gameManager.GameStatus == MRPGGameManager.GameState.Lobby)
+			if (gameManager.GameStatus == MRPGGameManager.GameState.Lobby)
 			{
 				await commandContext.Channel.SendMessageAsync("I am going to make a dungeon for you, please wait a few seconds");
 				gameManager.StartNewGame();
-
 				await commandContext.Channel.SendMessageAsync("Map is ready, here it comes");
-				//string fullMapFilePath = gameManager.VisualizeFullMap();
-
-				//using (FileStream fullMapStream = File.Open(fullMapFilePath, FileMode.Open))
-				//{
-				//	DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
-				//	messageBuilder.WithFile(fullMapStream);
-				//	await commandContext.Channel.SendMessageAsync(messageBuilder);
-				//}
-
-				string playerViewFilePath = gameManager.VisualizePlayerView(commandContext.User);
-				using (FileStream playerViewStream = File.Open(playerViewFilePath, FileMode.Open))
-				{
-					DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
-					messageBuilder.WithFile(playerViewStream);
-					await commandContext.Channel.SendMessageAsync(messageBuilder);
-				}
+				DisplayPlayerView(commandContext.User, gameManager, commandContext.Channel);
 			}
 			else
 			{
 				await commandContext.Channel.SendMessageAsync("The adventure has already begun, no need to start it");
 			}
-		}		
+		}
+
+		[Command("RPGMove"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
+		public async Task MoveCharacter(CommandContext commandContext, string coordinate)
+		{
+			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
+			{
+				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
+				return;
+			}
+			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
+
+			if (coordinate.Length == 2 && Char.IsLetter(coordinate[0]) && Char.IsDigit(coordinate[1]))
+			{
+				await commandContext.Channel.SendMessageAsync("Valid Coordinate Given");
+				gameManager.MoveCharacter(commandContext.User, coordinate);
+				DisplayPlayerView(commandContext.User, gameManager, commandContext.Channel);
+			}
+		}
+
+		[Command("RPGMap"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
+		public async Task ShowFullMap(CommandContext commandContext)
+		{
+			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
+			{
+				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
+				return;
+			}
+			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
+
+			string playerViewFilePath = gameManager.VisualizeFullMap();
+			using (FileStream playerViewStream = File.Open(playerViewFilePath, FileMode.Open))
+			{
+				DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
+				messageBuilder.WithFile(playerViewStream);
+				await commandContext.Channel.SendMessageAsync(messageBuilder);
+			}
+
+		}
+
+		private async void DisplayPlayerView(DiscordUser player, MRPGGameManager activeGame, DiscordChannel channelToSend)
+		{
+			string playerViewFilePath = activeGame.VisualizePlayerView(player);
+			using (FileStream playerViewStream = File.Open(playerViewFilePath, FileMode.Open))
+			{
+				DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
+				messageBuilder.WithFile(playerViewStream);
+				await channelToSend.SendMessageAsync(messageBuilder);
+			}
+		}
 	}
 }

@@ -10,6 +10,7 @@ namespace No_u_discord_bot.MushroomRPG
 	class MRPGMapGenerator
 	{
 		public Dictionary<int, List<MRPGMapTile>> GeneratedMap { get; private set; }
+		public MRPGStartingRoom StartingRoom { get; private set; }
 		private List<MRPGRoom> _rooms;
 		private int roomMargin = 1;
 		public int Rows { get; private set; }
@@ -46,7 +47,17 @@ namespace No_u_discord_bot.MushroomRPG
 			// Generate rooms
 			for (int i = 0; i < rooms; i++)
 			{
-				MRPGRoom newRoom = new MRPGRoom(numberGenerator.Next(3, 7), numberGenerator.Next(3, 7));
+				MRPGRoom newRoom;
+				if (i == 0)
+				{
+					this.StartingRoom = new MRPGStartingRoom(numberGenerator.Next(3, 7), numberGenerator.Next(3, 7));
+					newRoom = StartingRoom;
+				}
+				else
+				{
+					newRoom = new MRPGRoom(numberGenerator.Next(3, 7), numberGenerator.Next(3, 7));
+				}
+
 				MRPGIntVector2 roomSizedHalved = new MRPGIntVector2((int)MathF.Floor(newRoom.RoomWidth / 2f), (int)MathF.Floor(newRoom.RoomHeight / 2f));
 				MRPGIntVector2 roomLocation;
 				int offsetLeft = (int)MathF.Floor((newRoom.RoomWidth) / 2f);
