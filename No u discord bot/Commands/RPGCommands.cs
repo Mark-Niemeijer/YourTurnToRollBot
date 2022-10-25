@@ -103,12 +103,37 @@ namespace No_u_discord_bot.Commands
 				return;
 			}
 			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
+			if(gameManager.PlayersTurn != commandContext.User)
+			{
+				await commandContext.Channel.SendMessageAsync("It is not your turn yet, be patient");
+				return;
+			}
 
 			if (coordinate.Length == 2 && Char.IsLetter(coordinate[0]) && Char.IsDigit(coordinate[1]))
 			{
 				await commandContext.Channel.SendMessageAsync("Valid Coordinate Given");
-				gameManager.MoveCharacter(commandContext.User, coordinate);
+				bool enoughMovementLeft;
+				bool locationAvailable;
+				bool moveSuccesful = gameManager.MoveCharacter(commandContext.User, coordinate, out locationAvailable, out enoughMovementLeft);
+				if(!moveSuccesful)
+				{
+					if (!locationAvailable)
+					{
+						await commandContext.Channel.SendMessageAsync("You cannot move into a wall, try a more open spot");
+						return;
+					}
+					else if(!enoughMovementLeft)
+					{
+						await commandContext.Channel.SendMessageAsync("You don't have enough move points left to go that far");
+						return;
+					}
+				}
 				DisplayPlayerView(commandContext.User, gameManager, commandContext.Channel);
+			}
+			else
+			{
+				await commandContext.Channel.SendMessageAsync("That's not a valid coordinate. The letter comes first, then the number");
+				return;
 			}
 		}
 

@@ -21,6 +21,7 @@ namespace No_u_discord_bot.InBotAppManagers
 		private string _fullMapLocation;
 		private Bitmap playerToken;
 		private int _turnOrderIndex;
+		private int _movementPerTile;
 
 		public MRPGGameManager(DiscordChannel channel)
 		{
@@ -32,6 +33,7 @@ namespace No_u_discord_bot.InBotAppManagers
 			_fullMapLocation = Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + channel.Id + ".png";
 			_playingInChannel = channel;
 			_turnOrderIndex = 0;
+			_movementPerTile = 5;
 		}
 
 		public void StartNewGame()
@@ -100,11 +102,16 @@ namespace No_u_discord_bot.InBotAppManagers
 		#endregion
 
 		#region PlayerActions
-		public void MoveCharacter(DiscordUser user, string coordinate)
+		public bool MoveCharacter(DiscordUser user, string coordinate, out bool locationWalkable, out bool enoughMovementLeft)
 		{
-			if(_currentPlayers.ContainsKey(user) && _currentPlayers[user].CurrentMovement > 0)
+			locationWalkable = true;
+			enoughMovementLeft = true;
+
+			if(_currentPlayers.ContainsKey(user))
 			{
 				MRPGCharacter controlledCharacter = _currentPlayers[user];
+				MRPGPathFinder pathFinder = new MRPGPathFinder(_mRPGMap.GeneratedMap);
+
 				int CenterLetter = 65 + _currentPlayers[user].SightRadius;
 				int horizontalCoordinate = (int)coordinate.ToUpper()[0];
 				int verticalCoordinate = Convert.ToInt32(coordinate[1].ToString());
@@ -112,12 +119,27 @@ namespace No_u_discord_bot.InBotAppManagers
 				int verticalOffset = verticalCoordinate - 1 - controlledCharacter.SightRadius;
 				MRPGIntVector2 offsetVector = new MRPGIntVector2(horizontalOffset, verticalOffset);
 				MRPGIntVector2 newLocation = controlledCharacter.GridLocation + offsetVector;
+				List<MRPGMapTile> pathToTarget = pathFinder.FindPath(newLocation, controlledCharacter.GridLocation, true, false);
 				
 				if(_mRPGMap.GeneratedMap[newLocation.X][newLocation.Y].TileFuntion != null)
 				{
-					controlledCharacter.SetLocation(newLocation);
+					if (_currentPlayers[user].CurrentMovement >= pathToTarget.Count * _movementPerTile)
+					{
+						_currentPlayers[user].CurrentMovement -= pathToTarget.Count * _movementPerTile;
+						controlledCharacter.SetLocation(newLocation);
+						return true;
+					}
+					else
+					{
+						enoughMovementLeft = false;
+					}
+				}
+				else
+				{
+					locationWalkable = false;
 				}
 			}
+			return false;
 		}
 		#endregion
 	}
