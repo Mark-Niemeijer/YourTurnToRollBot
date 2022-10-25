@@ -86,7 +86,7 @@ namespace No_u_discord_bot.Commands
 				await commandContext.Channel.SendMessageAsync("I am going to make a dungeon for you, please wait a few seconds");
 				gameManager.StartNewGame();
 				await commandContext.Channel.SendMessageAsync("Map is ready, here it comes");
-				DisplayPlayerView(commandContext.User, gameManager, commandContext.Channel);
+				DisplayPlayerView(gameManager.PlayersTurn, gameManager, commandContext.Channel);
 			}
 			else
 			{

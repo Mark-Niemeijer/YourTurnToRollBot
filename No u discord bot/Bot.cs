@@ -67,7 +67,7 @@ namespace No_u_discord_bot
 
 		private Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
 		{
-			CustomDebugInfo.LogError("Command " + e.Command.Name + " threw an exception:\n" + e.Exception);
+			CustomDebugInfo.LogError("Command threw an exception:" + e.Exception.Message + "\nFull information: " + e.Exception.ToString());
 			return Task.CompletedTask;
 		}
 

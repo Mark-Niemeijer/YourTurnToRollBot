@@ -13,13 +13,14 @@ namespace No_u_discord_bot.InBotAppManagers
 	{
 		public enum GameState { Lobby, Ingame }
 		public GameState GameStatus { get; private set; }
+		public DiscordUser PlayersTurn { get { return _currentPlayers.Keys.ElementAt(_turnOrderIndex); } }
 		private Dictionary<DiscordUser, MRPGCharacter> _currentPlayers;
 		private MRPGMapGenerator _mRPGMap;
 		private MRPGMapVisualizer _mapVisualizer;
 		private DiscordChannel _playingInChannel;
 		private string _fullMapLocation;
 		private Bitmap playerToken;
-		private DiscordUser _currentUserTurn;
+		private int _turnOrderIndex;
 
 		public MRPGGameManager(DiscordChannel channel)
 		{
@@ -30,6 +31,7 @@ namespace No_u_discord_bot.InBotAppManagers
 			playerToken = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTokens\\HumanWarrior.png");
 			_fullMapLocation = Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + channel.Id + ".png";
 			_playingInChannel = channel;
+			_turnOrderIndex = 0;
 		}
 
 		public void StartNewGame()
@@ -54,6 +56,7 @@ namespace No_u_discord_bot.InBotAppManagers
 			GameStatus = GameState.Ingame;
 		}
 
+		#region Visualisation
 		public string VisualizeFullMap()
 		{
 			string mapWithTokensPath = Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + _playingInChannel.Id + "-Tokens.png";
@@ -75,7 +78,9 @@ namespace No_u_discord_bot.InBotAppManagers
 			}
 			return Environment.CurrentDirectory + "\\DataObjects\\RPGMaps\\" + _playingInChannel.Id + "-" + discordUser.Id + ".png";
 		}
+		#endregion
 
+		#region InternalInteractions
 		public void AddPlayer(DiscordUser discordUser)
 		{
 			if(!_currentPlayers.ContainsKey(discordUser))
@@ -86,18 +91,15 @@ namespace No_u_discord_bot.InBotAppManagers
 				playerCharacter.CurrentMovement = playerCharacter.MaxMovement;
 				_currentPlayers.Add(discordUser, playerCharacter);
 			}
-
-			if(_currentUserTurn == null)
-			{
-				_currentUserTurn = discordUser;
-			}
 		}
 
 		public List<DiscordUser> getCurrentPlayers()
 		{
 			return new List<DiscordUser>(_currentPlayers.Keys);
 		}
+		#endregion
 
+		#region PlayerActions
 		public void MoveCharacter(DiscordUser user, string coordinate)
 		{
 			if(_currentPlayers.ContainsKey(user) && _currentPlayers[user].CurrentMovement > 0)
@@ -117,5 +119,6 @@ namespace No_u_discord_bot.InBotAppManagers
 				}
 			}
 		}
+		#endregion
 	}
 }

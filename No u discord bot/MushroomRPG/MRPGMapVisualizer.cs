@@ -12,6 +12,18 @@ namespace No_u_discord_bot.MushroomRPG
 		private readonly Bitmap RoomTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\RoomTile.png");
 		private readonly Bitmap WallTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\WallTile.png");
 		private readonly Bitmap PathTile = new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\PathTile.png");
+		private readonly List<Bitmap> _horizontalCoordinats = new List<Bitmap>();
+		private readonly List<Bitmap> _verticalCoordinats = new List<Bitmap>();
+
+		public MRPGMapVisualizer()
+		{
+			for (int i = 1; i < 9; i++)
+			{
+				char letter = (char)(64 + i);
+				_verticalCoordinats.Add(new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\Tile" + i + ".png"));
+				_horizontalCoordinats.Add(new Bitmap(Environment.CurrentDirectory + "\\DataObjects\\RPGTiles\\Tile" + letter.ToString() + ".png"));
+			}
+		}
 
 		public Bitmap VisualizeBackGround(MRPGMapGenerator mapGenerator)
 		{
@@ -46,13 +58,24 @@ namespace No_u_discord_bot.MushroomRPG
 
 		public Bitmap VisualizePlayerView(Bitmap fullMap, MRPGCharacter character)
 		{
-			Bitmap playerVision = new Bitmap(horizontalImageSize * (character.SightRadius * 2 + 1), verticalImageSize * (character.SightRadius * 2 + 1));
+			//SightRadius times 2 for diameter + 1 for tile they are standing on 
+			//Another +1 for coordinateImages
+			int tilesInView = character.SightRadius * 2 + 2;
+
+			Bitmap playerVision = new Bitmap(horizontalImageSize * (tilesInView), verticalImageSize * (tilesInView));
 			using (Graphics playerVisionGraphics = Graphics.FromImage(playerVision))
 			{
+				for (int i = 1; i < tilesInView; i++)
+				{
+					playerVisionGraphics.DrawImage(_horizontalCoordinats[i - 1], new Rectangle(horizontalImageSize * i, 0, horizontalImageSize, verticalImageSize));
+					playerVisionGraphics.DrawImage(_verticalCoordinats[i - 1], new Rectangle(0, verticalImageSize * i, horizontalImageSize, verticalImageSize));
+				}
+
 				int characterImageLocationX = character.GridLocation.X * horizontalImageSize;
 				int characterImageLocationY = character.GridLocation.Y * verticalImageSize;
 				int offset = character.SightRadius * horizontalImageSize;
-				playerVisionGraphics.DrawImage(fullMap, new Rectangle(0, 0, playerVision.Width, playerVision.Height),
+				playerVisionGraphics.DrawImage(fullMap, 
+					new Rectangle(horizontalImageSize, verticalImageSize, playerVision.Width - horizontalImageSize, playerVision.Height - verticalImageSize),
 					new Rectangle(characterImageLocationX - offset, characterImageLocationY - offset, 
 					offset * 2 + horizontalImageSize, offset * 2 + verticalImageSize), GraphicsUnit.Pixel);
 			}
