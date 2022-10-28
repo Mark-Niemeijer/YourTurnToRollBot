@@ -92,6 +92,9 @@
     <None Update="DataObjects\RPGTokens\HumanWarrior.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="DataObjects\RPGTokens\OrcGrunt.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="DataObjects\WordList.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

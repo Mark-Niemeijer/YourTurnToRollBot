@@ -11,7 +11,7 @@ namespace No_u_discord_bot.MushroomRPG
 	{
 		public Dictionary<int, List<MRPGMapTile>> GeneratedMap { get; private set; }
 		public MRPGStartingRoom StartingRoom { get; private set; }
-		private List<MRPGRoom> _rooms;
+		public List<MRPGRoom> Rooms { get; private set; }
 		private int roomMargin = 1;
 		public int Rows { get; private set; }
 		public int Collumns { get; private set; }
@@ -19,7 +19,7 @@ namespace No_u_discord_bot.MushroomRPG
 		public MRPGMapGenerator()
 		{
 			GeneratedMap = new Dictionary<int, List<MRPGMapTile>>();
-			_rooms = new List<MRPGRoom>();
+			Rooms = new List<MRPGRoom>();
 		}
 
 		public void LoadFromFile(string FilePath)
@@ -74,7 +74,7 @@ namespace No_u_discord_bot.MushroomRPG
 					newRoom.minVector = new MRPGIntVector2(roomLocation.X - offsetLeft, roomLocation.Y - offsetTop);
 					newRoom.maxVector = new MRPGIntVector2(roomLocation.X - offsetLeft + newRoom.RoomWidth - 1, roomLocation.Y - offsetTop + newRoom.RoomHeight - 1);
 
-					foreach (MRPGRoom room in _rooms)
+					foreach (MRPGRoom room in Rooms)
 					{
 						locationAvailable = newRoom.maxVector.X + roomMargin < room.minVector.X ||
 											newRoom.minVector.X - roomMargin > room.maxVector.X ||
@@ -106,14 +106,14 @@ namespace No_u_discord_bot.MushroomRPG
 					}
 				}
 				newRoom.SetRoomSurface(roomTiles);
-				_rooms.Add(newRoom);
+				Rooms.Add(newRoom);
 			}
 
 			//Generate pathways
-			foreach (MRPGRoom room in _rooms)
+			foreach (MRPGRoom room in Rooms)
 			{
 				// Pick the next room to connect to
-				List<MRPGRoom> roomsByDistance = new List<MRPGRoom>(_rooms);
+				List<MRPGRoom> roomsByDistance = new List<MRPGRoom>(Rooms);
 				roomsByDistance = roomsByDistance.OrderBy(i => (i.RoomLocation - room.RoomLocation).Magnitude).ToList();
 				MRPGRoom roomToConnectTo = roomsByDistance.First(i => !i.ConnectedTo.Contains(room) && i != room);
 				GeneratePathBetweenRooms(room, roomToConnectTo);
@@ -122,7 +122,7 @@ namespace No_u_discord_bot.MushroomRPG
 			//BUG: Generation pattern has a chance of generating multiple groups of rooms
 			//TEMP FIX: catalogue these groups and connect them
 			List<List<MRPGRoom>> roomsGroups = new List<List<MRPGRoom>>();
-			List<MRPGRoom> unaccountedRooms = new List<MRPGRoom>(_rooms);
+			List<MRPGRoom> unaccountedRooms = new List<MRPGRoom>(Rooms);
 
 			while (unaccountedRooms.Count > 0)
 			{
