@@ -74,10 +74,7 @@ namespace No_u_discord_bot.InBotAppManagers
 		{
 			if(!_currentPlayers.ContainsKey(discordUser))
 			{
-				MRPGCharacter playerCharacter = new MRPGCharacter(playerToken);
-				playerCharacter.SightRadius = 3;
-				playerCharacter.MaxMovement = 30;
-				playerCharacter.CurrentMovement = playerCharacter.MaxMovement;
+				MRPGPlayerCharacters playerCharacter = new MRPGPlayerCharacters(playerToken);
 				_currentPlayers.Add(discordUser, playerCharacter);
 				_charactersInGame.Add(playerCharacter);
 			}
@@ -123,6 +120,19 @@ namespace No_u_discord_bot.InBotAppManagers
 			}
 		}
 
+		public MRPGIntVector2 CoordinateToTile(string coordinate, DiscordUser fromUser)
+		{
+			MRPGCharacter controlledCharacter = _currentPlayers[fromUser];
+
+			int CenterLetter = 65 + _currentPlayers[fromUser].SightRadius;
+			int horizontalCoordinate = (int)coordinate.ToUpper()[0];
+			int verticalCoordinate = Convert.ToInt32(coordinate[1].ToString());
+			int horizontalOffset = horizontalCoordinate - CenterLetter;
+			int verticalOffset = verticalCoordinate - 1 - controlledCharacter.SightRadius;
+			MRPGIntVector2 offsetVector = new MRPGIntVector2(horizontalOffset, verticalOffset);
+			return controlledCharacter.GridLocation + offsetVector;
+		}
+
 		public void LoadSaveFile()
 		{
 			GameStatus = GameState.Ingame;
@@ -139,22 +149,14 @@ namespace No_u_discord_bot.InBotAppManagers
 			{
 				MRPGCharacter controlledCharacter = _currentPlayers[user];
 				MRPGPathFinder pathFinder = new MRPGPathFinder(_mRPGMap.GeneratedMap);
-
-				int CenterLetter = 65 + _currentPlayers[user].SightRadius;
-				int horizontalCoordinate = (int)coordinate.ToUpper()[0];
-				int verticalCoordinate = Convert.ToInt32(coordinate[1].ToString());
-				int horizontalOffset = horizontalCoordinate - CenterLetter;
-				int verticalOffset = verticalCoordinate - 1 - controlledCharacter.SightRadius;
-				MRPGIntVector2 offsetVector = new MRPGIntVector2(horizontalOffset, verticalOffset);
-				MRPGIntVector2 newLocation = controlledCharacter.GridLocation + offsetVector;
+				MRPGIntVector2 newLocation = CoordinateToTile(coordinate, user);
 				List<MRPGMapTile> pathToTarget = pathFinder.FindPath(newLocation, controlledCharacter.GridLocation, true, false);
 				
 				if(_mRPGMap.GeneratedMap[newLocation.X][newLocation.Y].TileFuntion != null)
 				{
 					if (_currentPlayers[user].CurrentMovement >= pathToTarget.Count * _movementPerTile)
 					{
-						_currentPlayers[user].CurrentMovement -= pathToTarget.Count * _movementPerTile;
-						controlledCharacter.SetLocation(newLocation);
+						_currentPlayers[user].MoveCharacter(newLocation, pathToTarget.Count * _movementPerTile);
 						movementLeft = _currentPlayers[user].CurrentMovement;
 						return true;
 					}
@@ -168,10 +170,62 @@ namespace No_u_discord_bot.InBotAppManagers
 			return false;
 		}
 
+		public (bool targetInRange, bool tokenPresentToAttack, bool attackHit, int rollToHit, int damageDealt) AttackTileLocation(DiscordUser attacker, string coordinate)
+		{
+			MRPGIntVector2 tileUnderAttack = CoordinateToTile(coordinate, attacker);
+			MRPGCharacter controlledCharacter = _currentPlayers[attacker];
+			List<MRPGMapTile> surroundingTiles = new List<MRPGMapTile>();
+			MRPGMapTile tileOfAttacker = _mRPGMap.GetTileAtLocation(controlledCharacter.GridLocation);
+			surroundingTiles.Add(tileOfAttacker);
+
+			for (int i = 0; i < controlledCharacter.AttackRange; i++)
+			{
+				List<MRPGMapTile> tileSurroundingSpecificTile = new List<MRPGMapTile>();
+				foreach (MRPGMapTile tile in surroundingTiles)
+				{
+					tileSurroundingSpecificTile.AddRange(_mRPGMap.GetAdjacentTiles(tile, true));
+				}
+
+				foreach (MRPGMapTile tile in tileSurroundingSpecificTile)
+				{
+					if (surroundingTiles.Contains(tile)) continue;
+					surroundingTiles.Add(tile);
+				}
+			}
+			surroundingTiles.Remove(tileOfAttacker);
+
+			if(!surroundingTiles.Contains(_mRPGMap.GetTileAtLocation(tileUnderAttack)))
+			{
+				//Target out of range
+				return (false, false, false, 0, 0);
+			}
+
+			MRPGCharacter potentialCharacterUnderAttack = _charactersInGame.FirstOrDefault(character => character.GridLocation.Equals(tileUnderAttack));
+			if (potentialCharacterUnderAttack == null)
+			{
+				//Nobody there to attack
+				return (true, false, false, 0, 0);
+			}
+
+			int hitRoll;
+			int damageDealt;
+			bool attackHit = controlledCharacter.AttackEnemy(potentialCharacterUnderAttack, out hitRoll, out damageDealt);
+			if(!attackHit)
+			{
+				//Attack missed
+				return (true, true, false, hitRoll, damageDealt);
+			}
+			else
+			{
+				//Attack landed;
+				return (true, true, true, hitRoll, damageDealt);
+			}
+		}
+
 		public void EndTurn(DiscordUser user)
 		{
 			MRPGCharacter controlledCharacter = _currentPlayers[user];
-			controlledCharacter.CurrentMovement = controlledCharacter.MaxMovement;
+			controlledCharacter.ResetOnTurn();
 
 			_turnOrderIndex = _turnOrderIndex + 1 == _currentPlayers.Count ? 0 : _turnOrderIndex + 1;
 		}

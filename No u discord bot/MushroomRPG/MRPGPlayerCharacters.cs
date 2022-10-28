@@ -5,19 +5,19 @@ using System.Text;
 
 namespace No_u_discord_bot.MushroomRPG
 {
-	class MRPGOrcGrunt : MRPGCharacter
+	class MRPGPlayerCharacters : MRPGCharacter
 	{
-		public MRPGOrcGrunt(Bitmap icon) : base(icon)
+		public MRPGPlayerCharacters(Bitmap icon) : base(icon)
 		{
 			SightRadius = 3;
 			MaxMovement = 30;
 			CurrentMovement = MaxMovement;
-			MaxHealth = 10;
+			MaxHealth = 30;
 			CurrentHealth = MaxHealth;
-			ArmourClass = 11;
-			HitBonus = 2;
+			ArmourClass = 16;
 			AttackRange = 1;
-			DamageBonus = 2;
+			HitBonus = 2;
+			DamageBonus = 4;
 			Alive = true;
 		}
 	}

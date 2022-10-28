@@ -74,24 +74,16 @@ namespace No_u_discord_bot.Commands
 		[Command("RPGMove"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
 		public async Task MoveCharacter(CommandContext commandContext, string coordinate)
 		{
-			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
-			{
-				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
-				return;
-			}
-			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
-			if (gameManager.PlayersTurn != commandContext.User)
-			{
-				await commandContext.Channel.SendMessageAsync("It is not your turn yet, be patient");
-				return;
-			}
+			//For future, let people move by reacting to a message with the letter emoticons which are preplaced by the bot
+			var validationReturn = await PerformInGameValidation(commandContext);
+			if (!validationReturn.ValidationSucces) return;
 
 			if (coordinate.Length == 2 && Char.IsLetter(coordinate[0]) && Char.IsDigit(coordinate[1]))
 			{
 				await commandContext.Channel.SendMessageAsync("Valid Coordinate Given");
 				int movementLeft;
 				bool locationAvailable;
-				bool moveSuccesful = gameManager.MoveCharacter(commandContext.User, coordinate, out locationAvailable, out movementLeft);
+				bool moveSuccesful = validationReturn.gameManager.MoveCharacter(commandContext.User, coordinate, out locationAvailable, out movementLeft);
 				if (!moveSuccesful)
 				{
 					if (!locationAvailable)
@@ -107,7 +99,7 @@ namespace No_u_discord_bot.Commands
 				}
 				else
 				{
-					await DisplayPlayerView(commandContext.User, gameManager, commandContext.Channel);
+					await DisplayPlayerView(commandContext.User, validationReturn.gameManager, commandContext.Channel);
 					await commandContext.Channel.SendMessageAsync("Put you right there, you still have " + movementLeft + " feet left");
 					return;
 				}
@@ -119,37 +111,58 @@ namespace No_u_discord_bot.Commands
 			}
 		}
 
-		[Command("RPGEndTurn"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
-		public async Task EndTurn(CommandContext commandContext)
+		[Command("RPGAttack"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
+		public async Task AttackCharacterCommand(CommandContext commandContext, string coordinate)
 		{
-			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
+			var validationReturn = await PerformInGameValidation(commandContext);
+			if (!validationReturn.ValidationSucces) return;
+			if (coordinate.Length != 2 || !Char.IsLetter(coordinate[0]) || !Char.IsDigit(coordinate[1]))
 			{
-				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
-				return;
-			}
-			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
-			if (gameManager.PlayersTurn != commandContext.User)
-			{
-				await commandContext.Channel.SendMessageAsync("It is not your turn yet, be patient");
+				await commandContext.Channel.SendMessageAsync("That's not a valid coordinate. The letter comes first, then the number");
 				return;
 			}
 
-			gameManager.EndTurn(commandContext.User);
-			await commandContext.Channel.SendMessageAsync(gameManager.PlayersTurn.Mention + ", its your turn to go now");
-			await DisplayPlayerView(gameManager.PlayersTurn, gameManager, commandContext.Channel);
+			var resultAttackTile = validationReturn.gameManager.AttackTileLocation(commandContext.User, coordinate);
+			if (!resultAttackTile.targetInRange)
+			{
+				await commandContext.Channel.SendMessageAsync("They are to far away for you to hit them");
+				return;
+			}
+			else if(!resultAttackTile.tokenPresentToAttack)
+			{
+				await commandContext.Channel.SendMessageAsync("You hit your weapon hard against the stone of the dungeon. It would be insulted if it could feel things");
+				return;
+			}
+			else if (!resultAttackTile.attackHit)
+			{
+				await commandContext.Channel.SendMessageAsync(String.Format("You swing your weapon for {0} at the target, but they dodge out of the way", resultAttackTile.rollToHit));
+				return;
+			}
+			else
+			{
+				await commandContext.Channel.SendMessageAsync(String.Format("You swing for {0} and hit the target!\nYou dealt {1} damage to them", resultAttackTile.rollToHit, resultAttackTile.damageDealt));
+				return;
+			}
+		}
+
+		[Command("RPGEndTurn"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
+		public async Task EndTurn(CommandContext commandContext)
+		{
+			var validationReturn = await PerformInGameValidation(commandContext);
+			if (!validationReturn.ValidationSucces) return;
+
+			validationReturn.gameManager.EndTurn(commandContext.User);
+			await commandContext.Channel.SendMessageAsync(validationReturn.gameManager.PlayersTurn.Mention + ", its your turn to go now");
+			await DisplayPlayerView(validationReturn.gameManager.PlayersTurn, validationReturn.gameManager, commandContext.Channel);
 		}
 
 		[Command("RPGMap"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
 		public async Task ShowFullMap(CommandContext commandContext)
 		{
-			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
-			{
-				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
-				return;
-			}
-			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
+			var validationReturn = await PerformInGameValidation(commandContext);
+			if (!validationReturn.ValidationSucces) return;
 
-			string playerViewFilePath = gameManager.VisualizeFullMap();
+			string playerViewFilePath = validationReturn.gameManager.VisualizeFullMap();
 			using (FileStream playerViewStream = File.Open(playerViewFilePath, FileMode.Open))
 			{
 				DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
@@ -157,6 +170,22 @@ namespace No_u_discord_bot.Commands
 				await commandContext.Channel.SendMessageAsync(messageBuilder);
 			}
 
+		}
+
+		private async Task<(bool ValidationSucces, MRPGGameManager gameManager)> PerformInGameValidation(CommandContext commandContext)
+		{
+			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
+			{
+				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
+				return (false, null);
+			}
+			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
+			if (gameManager.PlayersTurn != commandContext.User)
+			{
+				await commandContext.Channel.SendMessageAsync("It is not your turn yet, be patient");
+				return (false, null);
+			}
+			return (true, gameManager);
 		}
 
 		private async void JoinLobby(DiscordClient botClient, DiscordChannel channelButtonWasPressedIn, DiscordUser userPressingTheButton)

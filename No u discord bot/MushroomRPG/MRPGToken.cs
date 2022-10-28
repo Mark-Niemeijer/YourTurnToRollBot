@@ -14,7 +14,7 @@ namespace No_u_discord_bot.MushroomRPG
 			Icon = icon;
 		}
 
-		public void SetLocation(MRPGIntVector2 location)
+		public virtual void SetLocation(MRPGIntVector2 location)
 		{
 			GridLocation = location;
 		}

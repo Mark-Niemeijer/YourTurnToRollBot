@@ -170,6 +170,29 @@ namespace No_u_discord_bot.MushroomRPG
 			}
 		}
 
+		public List<MRPGMapTile> GetAdjacentTiles(MRPGMapTile startingTile, bool includeDiagonals)
+		{
+			List<MRPGMapTile> adjacentTiles = new List<MRPGMapTile>();
+			adjacentTiles.Add(GeneratedMap[startingTile.position.X + 1][startingTile.position.Y]);
+			adjacentTiles.Add(GeneratedMap[startingTile.position.X - 1][startingTile.position.Y]);
+			adjacentTiles.Add(GeneratedMap[startingTile.position.X][startingTile.position.Y + 1]);
+			adjacentTiles.Add(GeneratedMap[startingTile.position.X][startingTile.position.Y - 1]);
+			if(includeDiagonals)
+			{
+				adjacentTiles.Add(GeneratedMap[startingTile.position.X + 1][startingTile.position.Y - 1]);
+				adjacentTiles.Add(GeneratedMap[startingTile.position.X + 1][startingTile.position.Y + 1]);
+				adjacentTiles.Add(GeneratedMap[startingTile.position.X - 1][startingTile.position.Y + 1]);
+				adjacentTiles.Add(GeneratedMap[startingTile.position.X - 1][startingTile.position.Y - 1]);
+			}
+			return adjacentTiles;
+		}
+
+		public MRPGMapTile GetTileAtLocation(MRPGIntVector2 mRPGIntVector2)
+		{
+			if (mRPGIntVector2.X < 0 || mRPGIntVector2.X == GeneratedMap.Keys.Count || mRPGIntVector2.Y < 0 || mRPGIntVector2.Y == GeneratedMap[mRPGIntVector2.X].Count) return null;
+			return GeneratedMap[mRPGIntVector2.X][mRPGIntVector2.Y];
+		}
+
 		private void GeneratePathBetweenRooms(MRPGRoom start, MRPGRoom end)
 		{
 			// find the shortest route to the connect points of the rooms

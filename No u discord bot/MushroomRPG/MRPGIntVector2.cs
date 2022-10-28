@@ -26,6 +26,17 @@ namespace No_u_discord_bot.MushroomRPG
 			return new MRPGIntVector2(vec1.X - vec2.X, vec1.Y - vec2.Y);
 		}
 
-
+		public override bool Equals(object obj)
+		{
+			if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+			{
+				return false;
+			}
+			else
+			{
+				MRPGIntVector2 otherVector = (MRPGIntVector2)obj;
+				return this.X == otherVector.X && this.Y == otherVector.Y;
+			}
+		}
 	}
 }
