@@ -36,28 +36,6 @@ namespace No_u_discord_bot.InBotAppManagers
 			_movementPerTile = 5;
 		}
 
-		public void StartNewGame()
-		{
-			GameStatus = GameState.Ingame;
-			_mRPGMap.GenerateNewMap(15, 30, 30);
-			Bitmap background = _mapVisualizer.VisualizeBackGround(_mRPGMap);
-
-			for (int i = 0; i < _currentPlayers.Values.Count; i++)
-			{
-				_currentPlayers.ElementAt(i).Value.SetLocation(_mRPGMap.StartingRoom.RoomTiles[i].position);
-			}
-
-			using (FileStream saveStream = File.Create(_fullMapLocation))
-			{
-				background.Save(saveStream, System.Drawing.Imaging.ImageFormat.Png);
-			}
-		}
-
-		public void LoadSaveFile()
-		{
-			GameStatus = GameState.Ingame;
-		}
-
 		#region Visualisation
 		public string VisualizeFullMap()
 		{
@@ -99,13 +77,35 @@ namespace No_u_discord_bot.InBotAppManagers
 		{
 			return new List<DiscordUser>(_currentPlayers.Keys);
 		}
+
+		public void StartNewGame()
+		{
+			GameStatus = GameState.Ingame;
+			_mRPGMap.GenerateNewMap(15, 30, 30);
+			Bitmap background = _mapVisualizer.VisualizeBackGround(_mRPGMap);
+
+			for (int i = 0; i < _currentPlayers.Values.Count; i++)
+			{
+				_currentPlayers.ElementAt(i).Value.SetLocation(_mRPGMap.StartingRoom.PlayerSpawnLocations[i].position);
+			}
+
+			using (FileStream saveStream = File.Create(_fullMapLocation))
+			{
+				background.Save(saveStream, System.Drawing.Imaging.ImageFormat.Png);
+			}
+		}
+
+		public void LoadSaveFile()
+		{
+			GameStatus = GameState.Ingame;
+		}
 		#endregion
 
 		#region PlayerActions
-		public bool MoveCharacter(DiscordUser user, string coordinate, out bool locationWalkable, out bool enoughMovementLeft)
+		public bool MoveCharacter(DiscordUser user, string coordinate, out bool locationWalkable, out int movementLeft)
 		{
 			locationWalkable = true;
-			enoughMovementLeft = true;
+			movementLeft = 0;
 
 			if(_currentPlayers.ContainsKey(user))
 			{
@@ -127,19 +127,25 @@ namespace No_u_discord_bot.InBotAppManagers
 					{
 						_currentPlayers[user].CurrentMovement -= pathToTarget.Count * _movementPerTile;
 						controlledCharacter.SetLocation(newLocation);
+						movementLeft = _currentPlayers[user].CurrentMovement;
 						return true;
-					}
-					else
-					{
-						enoughMovementLeft = false;
 					}
 				}
 				else
 				{
 					locationWalkable = false;
 				}
+				movementLeft = _currentPlayers[user].CurrentMovement;
 			}
 			return false;
+		}
+
+		public void EndTurn(DiscordUser user)
+		{
+			MRPGCharacter controlledCharacter = _currentPlayers[user];
+			controlledCharacter.CurrentMovement = controlledCharacter.MaxMovement;
+
+			_turnOrderIndex = _turnOrderIndex + 1 == _currentPlayers.Count ? 0 : _turnOrderIndex + 1;
 		}
 		#endregion
 	}

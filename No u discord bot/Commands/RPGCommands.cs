@@ -86,7 +86,7 @@ namespace No_u_discord_bot.Commands
 				await commandContext.Channel.SendMessageAsync("I am going to make a dungeon for you, please wait a few seconds");
 				gameManager.StartNewGame();
 				await commandContext.Channel.SendMessageAsync("Map is ready, here it comes");
-				DisplayPlayerView(gameManager.PlayersTurn, gameManager, commandContext.Channel);
+				await DisplayPlayerView(gameManager.PlayersTurn, gameManager, commandContext.Channel);
 			}
 			else
 			{
@@ -112,9 +112,9 @@ namespace No_u_discord_bot.Commands
 			if (coordinate.Length == 2 && Char.IsLetter(coordinate[0]) && Char.IsDigit(coordinate[1]))
 			{
 				await commandContext.Channel.SendMessageAsync("Valid Coordinate Given");
-				bool enoughMovementLeft;
+				int movementLeft;
 				bool locationAvailable;
-				bool moveSuccesful = gameManager.MoveCharacter(commandContext.User, coordinate, out locationAvailable, out enoughMovementLeft);
+				bool moveSuccesful = gameManager.MoveCharacter(commandContext.User, coordinate, out locationAvailable, out movementLeft);
 				if(!moveSuccesful)
 				{
 					if (!locationAvailable)
@@ -122,19 +122,44 @@ namespace No_u_discord_bot.Commands
 						await commandContext.Channel.SendMessageAsync("You cannot move into a wall, try a more open spot");
 						return;
 					}
-					else if(!enoughMovementLeft)
+					else
 					{
 						await commandContext.Channel.SendMessageAsync("You don't have enough move points left to go that far");
 						return;
 					}
 				}
-				DisplayPlayerView(commandContext.User, gameManager, commandContext.Channel);
+				else
+				{
+					await DisplayPlayerView(commandContext.User, gameManager, commandContext.Channel);
+					await commandContext.Channel.SendMessageAsync("Put you right there, you still have " + movementLeft + " feet left");
+					return;
+				}
 			}
 			else
 			{
 				await commandContext.Channel.SendMessageAsync("That's not a valid coordinate. The letter comes first, then the number");
 				return;
 			}
+		}
+
+		[Command("RPGEndTurn"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
+		public async Task EndTurn(CommandContext commandContext)
+		{
+			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
+			{
+				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
+				return;
+			}
+			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
+			if (gameManager.PlayersTurn != commandContext.User)
+			{
+				await commandContext.Channel.SendMessageAsync("It is not your turn yet, be patient");
+				return;
+			}
+
+			gameManager.EndTurn(commandContext.User);
+			await commandContext.Channel.SendMessageAsync(gameManager.PlayersTurn.Mention + ", its your turn to go now");
+			await DisplayPlayerView(gameManager.PlayersTurn, gameManager, commandContext.Channel);
 		}
 
 		[Command("RPGMap"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
@@ -157,7 +182,7 @@ namespace No_u_discord_bot.Commands
 
 		}
 
-		private async void DisplayPlayerView(DiscordUser player, MRPGGameManager activeGame, DiscordChannel channelToSend)
+		private async Task<bool> DisplayPlayerView(DiscordUser player, MRPGGameManager activeGame, DiscordChannel channelToSend)
 		{
 			string playerViewFilePath = activeGame.VisualizePlayerView(player);
 			using (FileStream playerViewStream = File.Open(playerViewFilePath, FileMode.Open))
@@ -166,6 +191,7 @@ namespace No_u_discord_bot.Commands
 				messageBuilder.WithFile(playerViewStream);
 				await channelToSend.SendMessageAsync(messageBuilder);
 			}
+			return true;
 		}
 	}
 }

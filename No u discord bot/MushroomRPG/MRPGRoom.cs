@@ -13,26 +13,29 @@ namespace No_u_discord_bot.MushroomRPG
 		public MRPGIntVector2 maxVector;
 		public MRPGIntVector2 RoomLocation;
 		public List<MRPGRoom> ConnectedTo;
-		public MRPGMapTile TopEntrance { get; private set; }
-		public MRPGMapTile BottomEntrance { get; private set; }
-		public MRPGMapTile RightEntrance { get; private set; }
-		public MRPGMapTile LeftEntrance { get; private set; }
-		public List<MRPGMapTile> RoomTiles { get; private set; }
+		public MRPGMapTile TopEntrance { get; protected set; }
+		public MRPGMapTile BottomEntrance { get; protected set; }
+		public MRPGMapTile RightEntrance { get; protected set; }
+		public MRPGMapTile LeftEntrance { get; protected set; }
+		public List<MRPGMapTile> RoomTiles { get; protected set; }
+		public List<MRPGMapTile> EnemySpawnLocations { get; protected set; }
 
 		public MRPGRoom(int height, int width)
 		{
 			RoomHeight = height;
 			RoomWidth = width;
 			ConnectedTo = new List<MRPGRoom>();
+			EnemySpawnLocations = new List<MRPGMapTile>();
 		}
 
 		public virtual void SetRoomSurface(List<MRPGMapTile> surfaceTiles)
 		{
 			RoomTiles = surfaceTiles;
 			SetRoomEntrances();
+			SetEnemySpawnLocations();
 		}
 
-		private void SetRoomEntrances()
+		protected virtual void SetRoomEntrances()
 		{
 			MRPGIntVector2 centerLeft = new MRPGIntVector2(minVector.X, (int)Math.Floor((minVector.Y + maxVector.Y) / 2f));
 			MRPGIntVector2 centerRight = new MRPGIntVector2(maxVector.X, (int)Math.Floor((minVector.Y + maxVector.Y) / 2f));
@@ -42,6 +45,12 @@ namespace No_u_discord_bot.MushroomRPG
 			BottomEntrance = RoomTiles.FirstOrDefault(i => centerBottom.X == i.position.X && centerBottom.Y == i.position.Y);
 			RightEntrance = RoomTiles.FirstOrDefault(i => centerRight.X == i.position.X && centerRight.Y == i.position.Y);
 			LeftEntrance = RoomTiles.FirstOrDefault(i => centerLeft.X == i.position.X && centerLeft.Y == i.position.Y);
+		}
+
+		protected virtual void SetEnemySpawnLocations()
+		{
+			if (RoomTiles == null) return;
+			EnemySpawnLocations = new List<MRPGMapTile>(RoomTiles);
 		}
 	}
 }
