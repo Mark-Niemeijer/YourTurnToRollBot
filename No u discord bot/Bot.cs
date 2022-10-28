@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
@@ -34,6 +35,7 @@ namespace No_u_discord_bot
 			Client.Ready += OnClientReady;
 			Client.MessageCreated += new Non_Prefix_Commands().OnClientMessageCreated;
 			Client.ClientErrored += Client_ClientErrored;
+			Client.ComponentInteractionCreated += Client_ComponentInteractionCreated;
 
 			CommandsNextConfiguration commandsNextConfig = new CommandsNextConfiguration();
 			commandsNextConfig.StringPrefixes = configJson.CommandPrefixs;
@@ -63,6 +65,17 @@ namespace No_u_discord_bot
 			await Client.ConnectAsync();
 			//Keep bot running
 			await Task.Delay(-1);
+		}
+
+		private async Task Client_ComponentInteractionCreated(DiscordClient sender, DSharpPlus.EventArgs.ComponentInteractionCreateEventArgs e)
+		{
+			DiscordMessage originalMessage = e.Message;
+			DiscordMessageBuilder updatedMessage = new DiscordMessageBuilder();
+			updatedMessage.WithContent(originalMessage.Content);
+			updatedMessage.AddComponents(originalMessage.Components);
+
+			ButtonPressedEvent.ButtonPressed(e.Id, sender, e.Channel, e.User);
+			await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder(updatedMessage));
 		}
 
 		private Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)

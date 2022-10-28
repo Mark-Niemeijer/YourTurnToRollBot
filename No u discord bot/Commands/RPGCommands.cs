@@ -1,4 +1,5 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using No_u_discord_bot.Helpers;
@@ -16,6 +17,9 @@ namespace No_u_discord_bot.Commands
 	class RPGCommands : BaseCommandModule
 	{
 		private Dictionary<DiscordChannel, MRPGGameManager> _activeGames;
+		private readonly string _joinLobbyButtonID = "RPGJoinLobby";
+		private readonly string _createNewWorldButtonID = "RPGNewGame";
+		private readonly string _loadGameButtonID = "RPGLoadGame";
 
 		[Command("RPGStart"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
 		public async Task StartGame(CommandContext commandContext)
@@ -40,58 +44,31 @@ namespace No_u_discord_bot.Commands
 				return;
 			}
 
-			await commandContext.Channel.SendMessageAsync("Welcome to the " + commandContext.Client.CurrentUser.Mention + " tavern, are we starting a new adventure or continuing an old one?\n" +
-				"Make sure everyone is around the table before you start. Use the [RPGJoin] Command to come sit with us.\n" +
-				"When everyone is seated, use the [RPGNewGame] or [RPGLoadGame] command to start");
+			ButtonPressedEvent.AddListenerer(_joinLobbyButtonID, JoinLobby);
+			ButtonPressedEvent.AddListenerer(_createNewWorldButtonID, CreateNewDungeon);
+
+			DiscordMessageBuilder lobbyMessage = new DiscordMessageBuilder();
+			lobbyMessage.WithContent("Welcome to the " + commandContext.Client.CurrentUser.Mention + " tavern, are we starting a new adventure or continuing an old one?\n" +
+				"Make sure everyone is around the table before you start.");
+			DiscordButtonComponent joinButton = new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, _joinLobbyButtonID, "Join this adventure");
+			DiscordButtonComponent startNewButton = new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, _createNewWorldButtonID, "Delve through a new dungeon");
+			DiscordButtonComponent loadGame = new DiscordButtonComponent(DSharpPlus.ButtonStyle.Primary, _loadGameButtonID, "Revisit an old dungeon");
+			lobbyMessage.AddComponents(new DiscordComponent[] { joinButton, startNewButton, loadGame });
+
+			await commandContext.Channel.SendMessageAsync(lobbyMessage);
 			await JoinGame(commandContext);
 		}
 
 		[Command("RPGJoin"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
 		public async Task JoinGame(CommandContext commandContext)
 		{
-			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
-			{
-				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
-				return;
-			}
-			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
-
-			if (gameManager.GameStatus == MRPGGameManager.GameState.Lobby)
-			{
-				List<DiscordUser> playersInGame = gameManager.getCurrentPlayers();
-				if (playersInGame.Contains(commandContext.User))
-				{
-					await commandContext.Channel.SendMessageAsync("You are already at the table " + commandContext.User.Mention);
-				}
-				else
-				{
-					await commandContext.Channel.SendMessageAsync("Welcome to the table " + commandContext.User.Mention + ", lets have a great adventure");
-					gameManager.AddPlayer(commandContext.User);
-				}
-			}
+			JoinLobby(commandContext.Client, commandContext.Channel, commandContext.User);
 		}
 
 		[Command("RPGNewGame"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
 		public async Task BeginNewGame(CommandContext commandContext)
 		{
-			if (_activeGames == null || !_activeGames.ContainsKey(commandContext.Channel))
-			{
-				await commandContext.Channel.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
-				return;
-			}
-			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
-
-			if (gameManager.GameStatus == MRPGGameManager.GameState.Lobby)
-			{
-				await commandContext.Channel.SendMessageAsync("I am going to make a dungeon for you, please wait a few seconds");
-				gameManager.StartNewGame();
-				await commandContext.Channel.SendMessageAsync("Map is ready, here it comes");
-				await DisplayPlayerView(gameManager.PlayersTurn, gameManager, commandContext.Channel);
-			}
-			else
-			{
-				await commandContext.Channel.SendMessageAsync("The adventure has already begun, no need to start it");
-			}
+			CreateNewDungeon(commandContext.Client, commandContext.Channel, commandContext.User);
 		}
 
 		[Command("RPGMove"), Description(""), CommandCustomGroupAttribute("RPGCommands")]
@@ -103,7 +80,7 @@ namespace No_u_discord_bot.Commands
 				return;
 			}
 			MRPGGameManager gameManager = _activeGames[commandContext.Channel];
-			if(gameManager.PlayersTurn != commandContext.User)
+			if (gameManager.PlayersTurn != commandContext.User)
 			{
 				await commandContext.Channel.SendMessageAsync("It is not your turn yet, be patient");
 				return;
@@ -115,7 +92,7 @@ namespace No_u_discord_bot.Commands
 				int movementLeft;
 				bool locationAvailable;
 				bool moveSuccesful = gameManager.MoveCharacter(commandContext.User, coordinate, out locationAvailable, out movementLeft);
-				if(!moveSuccesful)
+				if (!moveSuccesful)
 				{
 					if (!locationAvailable)
 					{
@@ -180,6 +157,56 @@ namespace No_u_discord_bot.Commands
 				await commandContext.Channel.SendMessageAsync(messageBuilder);
 			}
 
+		}
+
+		private async void JoinLobby(DiscordClient botClient, DiscordChannel channelButtonWasPressedIn, DiscordUser userPressingTheButton)
+		{
+			if (_activeGames == null || !_activeGames.ContainsKey(channelButtonWasPressedIn))
+			{
+				await channelButtonWasPressedIn.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
+				return;
+			}
+			MRPGGameManager gameManager = _activeGames[channelButtonWasPressedIn];
+
+			if (gameManager.GameStatus == MRPGGameManager.GameState.Lobby)
+			{
+				List<DiscordUser> playersInGame = gameManager.getCurrentPlayers();
+				if (playersInGame.Contains(userPressingTheButton))
+				{
+					await channelButtonWasPressedIn.SendMessageAsync("You are already at the table " + userPressingTheButton.Mention);
+				}
+				else
+				{
+					await channelButtonWasPressedIn.SendMessageAsync("Welcome to the table " + userPressingTheButton.Mention + ", lets have a great adventure");
+					gameManager.AddPlayer(userPressingTheButton);
+				}
+			}
+			else
+			{
+				await channelButtonWasPressedIn.SendMessageAsync("I am sorry, but the game has already begun. Next dungeon you can play along");
+			}
+		}
+
+		private async void CreateNewDungeon(DiscordClient botClient, DiscordChannel channelButtonWasPressedIn, DiscordUser userPressingTheButton)
+		{
+			if (_activeGames == null || !_activeGames.ContainsKey(channelButtonWasPressedIn))
+			{
+				await channelButtonWasPressedIn.SendMessageAsync("No game is currently busy on this channel. Use the [RPGStart] Command first");
+				return;
+			}
+			MRPGGameManager gameManager = _activeGames[channelButtonWasPressedIn];
+
+			if (gameManager.GameStatus == MRPGGameManager.GameState.Lobby)
+			{
+				await channelButtonWasPressedIn.SendMessageAsync("I am grabbing my tiles and tokens, hold on a second");
+				gameManager.StartNewGame();
+				await channelButtonWasPressedIn.SendMessageAsync("I prepared the dungeon, here it comes");
+				await DisplayPlayerView(gameManager.PlayersTurn, gameManager, channelButtonWasPressedIn);
+			}
+			else
+			{
+				await channelButtonWasPressedIn.SendMessageAsync("The adventure has already begun, no need to start it");
+			}
 		}
 
 		private async Task<bool> DisplayPlayerView(DiscordUser player, MRPGGameManager activeGame, DiscordChannel channelToSend)
