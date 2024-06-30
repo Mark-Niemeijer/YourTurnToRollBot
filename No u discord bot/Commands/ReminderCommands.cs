@@ -28,9 +28,11 @@ namespace No_u_discord_bot.Commands
 					timeToBeReminded = timeToBeReminded.AddMinutes(reminderNumber);
 					break;
 				case "hour":
+				case "hours":
 					timeToBeReminded = timeToBeReminded.AddHours(reminderNumber);
 					break;
 				case "day":
+				case "days":
 					timeToBeReminded = timeToBeReminded.AddDays(reminderNumber);
 					break;
 				default:
