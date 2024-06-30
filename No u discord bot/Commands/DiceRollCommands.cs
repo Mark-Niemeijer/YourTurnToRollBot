@@ -29,7 +29,7 @@ namespace No_u_discord_bot.Commands
 			if (splitInput.Length == 2) {
 				amountOfDice = 1;
 				firstValueValid = true;
-				secondValueValid = int.TryParse(splitInput[2], out dieSides);
+				secondValueValid = int.TryParse(splitInput[1], out dieSides);
 			}
 		  	else if (splitInput.Length == 3)
 			{
