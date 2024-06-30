@@ -18,17 +18,30 @@ namespace No_u_discord_bot.Commands
 		[Command("Roll"), Aliases("R"), Description("Syntax: $[Command] [Number of dice]d[Number of sides on dice]\nRolls a certain die a number of times")]
 		public async Task RollDicesWithString(CommandContext commandContext, string inputString)
 		{
-			string[] splitInput = inputString.Split('d');
-			if (splitInput.Length != 2)
+  			// Split with a regex so that the delimiter ("d") is kept in the splitInput string
+			string[] splitInput = Regex.Split(inputString, "(d)");
+
+			int amountOfDice;
+			int dieSides;
+			bool firstValueValid;
+			bool secondValueValid;
+
+			if (splitInput.Length == 2) {
+				amountOfDice = 1;
+				firstValueValid = true;
+				secondValueValid = int.TryParse(splitInput[2], out dieSides);
+			}
+		  	else if (splitInput.Length == 3)
+			{
+				firstValueValid = int.TryParse(splitInput[0], out amountOfDice);
+				secondValueValid = int.TryParse(splitInput[2], out dieSides);
+			}
+			else
 			{
 				await commandContext.Channel.SendMessageAsync("Yeah no, try the propper syntax").ConfigureAwait(false);
 				return;
 			}
 
-			int amountOfDice = 0;
-			int dieSides = 0;
-			bool firstValueValid = int.TryParse(splitInput[0], out amountOfDice);
-			bool secondValueValid = int.TryParse(splitInput[1], out dieSides);
 
 			if(!firstValueValid)
 			{
