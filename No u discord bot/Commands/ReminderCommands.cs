@@ -36,7 +36,7 @@ namespace No_u_discord_bot.Commands
 					timeToBeReminded = timeToBeReminded.AddDays(reminderNumber);
 					break;
 				default:
-					await commandContext.Channel.SendMessageAsync("I am not familiar with that unit. Try \"min\", \"hour\", or \"day\"").ConfigureAwait(false);
+					await commandContext.Channel.SendMessageAsync("I am not familiar with that unit. Try \"min\", \"hour(s)\", or \"day(s)\"").ConfigureAwait(false);
 					return;
 			}
 
