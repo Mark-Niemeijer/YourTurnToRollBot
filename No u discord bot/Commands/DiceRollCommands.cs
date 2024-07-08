@@ -27,14 +27,18 @@ namespace No_u_discord_bot.Commands
 			bool firstValueValid;
 			bool secondValueValid;
 
-			if (splitInput.Length == 2) {
-				amountOfDice = 1;
-				firstValueValid = true;
-				secondValueValid = int.TryParse(splitInput[1], out dieSides);
-			}
-		  	else if (splitInput.Length == 3)
+
+		  	if (splitInput.Length == 3)
 			{
-				firstValueValid = int.TryParse(splitInput[0], out amountOfDice);
+				if (String.IsNullOrEmpty(splitInput[0]))
+    				{
+					amountOfDice = 1;
+					firstValueValid = true;
+				}
+    				else
+				{
+					firstValueValid = int.TryParse(splitInput[0], out amountOfDice);
+				}
 				secondValueValid = int.TryParse(splitInput[2], out dieSides);
 			}
 			else
