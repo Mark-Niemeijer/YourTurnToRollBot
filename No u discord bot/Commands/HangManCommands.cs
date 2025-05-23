@@ -70,6 +70,12 @@ namespace No_u_discord_bot.Commands
 			HangManManager hangManManager;
 			bool gamePresent = gameManagers.TryGetValue(commandContext.Channel, out hangManManager);
 			if (!gamePresent || hangManManager.CurrentStatus != HangManManager.GameStatus.Lobby) return;
+			
+			if(!hangManManager.PlayersInGame.Contains(commandContext.Message.Author))
+			{
+				await commandContext.Channel.SendMessageAsync("You have not joined the game and so cannot start it. There is still space if you want to join though").ConfigureAwait(false);
+				return;
+			}
 
 			if (hangManManager.PlayersInGame.Count > 0)
 			{
