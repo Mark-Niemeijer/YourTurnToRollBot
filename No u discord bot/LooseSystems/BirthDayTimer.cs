@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using No_u_discord_bot.DataObjects;
+using No_u_discord_bot.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +37,6 @@ namespace No_u_discord_bot.LooseSystems
 
 				if (birthDayUsers.Count > 0)
 				{
-					Dictionary<DiscordChannel, IReadOnlyCollection<DiscordUser>> registerdChannelsWithMembers = new Dictionary<DiscordChannel, IReadOnlyCollection<DiscordUser>>();
 					foreach (ulong registeredChannelID in birthdayData.RegisteredChannels)
 					{
 						DiscordChannel channel = await discordClient.GetChannelAsync(registeredChannelID);
@@ -45,15 +45,19 @@ namespace No_u_discord_bot.LooseSystems
 						{
 							if(membersOfChannel.Contains(birthDayUser))
 							{
+								CustomDebugInfo.LogInfo("User '" + birthDayUser.Mention + "' birthday celebrated in " + channel.Mention);
 								await channel.SendMessageAsync("Happy birthday " + birthDayUser.Mention + " :heart: :partying_face:").ConfigureAwait(false);
-								birthdayData.UserBirthDays[birthDayUser.Id] = birthdayData.UserBirthDays[birthDayUser.Id].AddYears(1);
-								JsonParser.GetInstance().SaveData(birthdayData);
 							}
 						}
-						registerdChannelsWithMembers.Add(channel, membersOfChannel);
-					}
-				}
-				Thread.Sleep(TimeSpan.FromHours(1));
+                    }
+
+					foreach (DiscordUser discordUser in birthDayUsers)
+                    {
+                        birthdayData.UserBirthDays[discordUser.Id] = birthdayData.UserBirthDays[discordUser.Id].AddYears(1);
+                    }
+                    JsonParser.GetInstance().SaveData(birthdayData);
+                }
+				Thread.Sleep(TimeSpan.FromMinutes(30));
 			}
 		}
 	}
